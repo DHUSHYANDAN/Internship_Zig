@@ -4,16 +4,18 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { baseurl } from '../url';
 
-function Home() {
-
-  
+function AddEmployee() {
   const [formData, setFormData] = useState({
-    name: '',
-    registration_number: '',
-    dept: '',
-    dob: '',
+    first_name: '',
+    last_name: '',
+    employee_code: '',
     email: '',
-    description: ''
+    phone_number: '',
+    department: '',
+    job_role: '',
+    hire_date: '',
+    status: 'Active',
+    dob: ''
   });
 
   const navigate = useNavigate();
@@ -26,7 +28,7 @@ function Home() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(baseurl+'/addusers', formData, {
+      const response = await axios.post(`${baseurl}/addEmployee`, formData, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -34,54 +36,77 @@ function Home() {
 
       alert(response.data.message);
       setFormData({
-        name: '',
-        registration_number: '',
-        dept: '',
-        dob: '',
+        first_name: '',
+        last_name: '',
+        employee_code: '',
         email: '',
-        description: ''
+        phone_number: '',
+        department: '',
+        job_role: '',
+        hire_date: '',
+        status: 'Active',
+        dob: ''
       });
-      
-      navigate('/viewUsers'); 
+
+      navigate('/viewEmployees');
     } catch (error) {
       console.error('Error:', error);
       alert(error.response ? error.response.data.error : 'Unable to submit the form. Please try again later.');
-      // alert('Error: Unable to submit the form. Please try again later.');
     }
   };
 
   return (
     <>
       <div className="header">
-        <h1>Add Student Details</h1>
-        <h3><Link to="/viewUsers" className="add-user">View Users</Link></h3>
+        <h1>Add Employee Details</h1>
+        <h3><Link to="/viewEmployees" className="add-user">View Employees</Link></h3>
       </div>
       <form onSubmit={handleSubmit}>
         <div className="form_in">
-          <label htmlFor="name">Name:</label><br />
-          <input type="text" id="name" value={formData.name} onChange={handleChange} required /><br />
-          
-          <label htmlFor="registration_number">Registration Number:</label><br />
-          <input type="number" id="registration_number" value={formData.registration_number} onChange={handleChange} required /><br />
-          
-          <label htmlFor="dept">Department:</label><br />
-          <input type="text" id="dept" value={formData.dept} onChange={handleChange} required /><br />
-          
-          <label htmlFor="dob">Date of Birth:</label><br />
-          <input type="date" id="dob" value={formData.dob} onChange={handleChange} required min="1900-01-01" max="2005-12-31" /><br />
-          
+          <label htmlFor="first_name">First Name:</label><br />
+          <input type="text" id="first_name" value={formData.first_name} onChange={handleChange} required /><br />
+
+          <label htmlFor="last_name">Last Name:</label><br />
+          <input type="text" id="last_name" value={formData.last_name} onChange={handleChange} required /><br />
+
+          <label htmlFor="employee_code">Employee Code:</label><br />
+          <input type="text" id="employee_code" value={formData.employee_code} onChange={handleChange} required /><br />
+
           <label htmlFor="email">Email:</label><br />
           <input type="email" id="email" value={formData.email} onChange={handleChange} required /><br />
-          
-          <label htmlFor="description">Description:</label><br />
-          <textarea id="description" value={formData.description} onChange={handleChange} required></textarea><br />
-          
-          <button type="submit">Submit</button><br /><br />
+
+          <label htmlFor="phone_number">Phone Number:</label><br />
+          <input type="text" id="phone_number" value={formData.phone_number} onChange={handleChange} /><br />
+
+          <label htmlFor="department">Department:</label><br />
+          <input type="text" id="department" value={formData.department} onChange={handleChange} required /><br />
+
+          <label htmlFor="job_role">Job Role:</label><br />
+          <select id="job_role" value={formData.job_role} onChange={handleChange} required>
+            <option value="">Select Job Role</option>
+            <option value="Developer">Developer</option>
+            <option value="Manager">Manager</option>
+            <option value="HR">HR</option>
+          </select><br />
+
+          <label htmlFor="hire_date">Hire Date:</label><br />
+          <input type="date" id="hire_date" value={formData.hire_date} onChange={handleChange} required /><br />
+
+          <label htmlFor="status">Status:</label><br />
+          <select id="status" value={formData.status} onChange={handleChange} required>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+            <option value="On Leave">On Leave</option>
+          </select><br />
+
+          <label htmlFor="dob">Date of Birth:</label><br />
+          <input type="date" id="dob" value={formData.dob} onChange={handleChange} required /><br /><br />
+
+          <button type="submit">Add Employee</button><br /><br />
         </div>
       </form>
-      <input type="checkbox" id="dropdown-toggle" className="" />
     </>
   );
 }
 
-export default Home;
+export default AddEmployee;
