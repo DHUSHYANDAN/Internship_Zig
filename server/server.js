@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const path = require('path');
-const routes = require("./routes/students");
+const routes = require("./routes/routerEmployee");
 
 const app = express();
 const port = 5000;
@@ -17,7 +17,7 @@ app.use(express.json());
 app.use('/', routes);
 
 //mognodb connection
-mongoose.connect('mongodb://localhost:27017/crudDB', {
+mongoose.connect('mongodb://localhost:27017/EmployeeDB', {
   
 }).then(() => {
     console.log('MongoDB connected');

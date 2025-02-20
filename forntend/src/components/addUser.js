@@ -79,6 +79,7 @@ function Home() {
           <button type="submit">Submit</button><br /><br />
         </div>
       </form>
+      <input type="checkbox" id="dropdown-toggle" className="" />
     </>
   );
 }

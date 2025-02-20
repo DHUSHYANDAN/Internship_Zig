@@ -1,5 +1,9 @@
+/*
+@tailwind base;
+@tailwind components;
+ @tailwind utilities;
 
-h1 {
+ h1 {
   color: #333;
 }
 
@@ -158,4 +162,4 @@ tr:hover {
 
 .delete:hover {
   background-color: #c9302c;
-}
+} */
