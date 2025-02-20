@@ -4,23 +4,27 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { baseurl } from '../url';
 
-function Edit() {
+function EditEmployee() {
   const [formData, setFormData] = useState({
-    name: '',
-    registration_number: '',
-    dept: '',
-    dob: '',
+    first_name: '',
+    last_name: '',
+    employee_code: '',
     email: '',
-    description: ''
+    phone_number: '',
+    department: '',
+    job_role: '',
+    hire_date: '',
+    status: '',
+    dob: ''
   });
 
-  const { registration_number } = useParams();
+  const { employee_code } = useParams();
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${baseurl}/updateuser/${registration_number}`);
+        const response = await axios.get(`${baseurl}/updateEmployee/${employee_code}`);
         setFormData(response.data);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -28,7 +32,7 @@ function Edit() {
     };
 
     fetchData();
-  }, [registration_number]);
+  }, [employee_code]);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -38,96 +42,120 @@ function Edit() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${baseurl}/updateusers`, formData, {
+      const response = await axios.post(`${baseurl}/updateEmployee`, formData, {
         headers: {
           'Content-Type': 'application/json'
         }
       });
 
       alert(response.data.message);
-      navigate('/viewUsers'); 
+      navigate('/viewEmployees'); 
     } catch (error) {
       console.error('Error:', error);
-      alert( 'Unable to update the form. Please try again later.');
+      alert('Unable to update the employee details. Please try again later.');
     }
   };
 
   return (
     <>
       <div className="header">
-        <h1>Edit Student Details</h1>
-        <h3><Link to="/viewUsers" className="add-user">View Users</Link></h3>
+        <h1>Edit Employee Details</h1>
+        <h3><Link to="/viewEmployees" className="add-user">View Employees</Link></h3>
       </div>
       <form onSubmit={handleSubmit}>
         <div className="form_in">
-          <label htmlFor="name">Name:</label><br />
+          <label htmlFor="first_name">First Name:</label><br />
           <input
             type="text"
-            id="name"
-            name="name"
-            value={formData.name}
+            id="first_name"
+            value={formData.first_name}
             onChange={handleChange}
             required
           /><br />
 
-          <label htmlFor="registration_number">Registration Number:</label><br />
+          <label htmlFor="last_name">Last Name:</label><br />
           <input
-            type="number"
-            id="registration_number"
-            name="registration_number"
-            value={formData.registration_number}
+            type="text"
+            id="last_name"
+            value={formData.last_name}
+            onChange={handleChange}
+            required
+          /><br />
+
+          <label htmlFor="employee_code">Employee Code:</label><br />
+          <input
+            type="text"
+            id="employee_code"
+            value={formData.employee_code}
             onChange={handleChange}
             required
             readOnly
-           
-          /><br />
-
-          <label htmlFor="dept">Department:</label><br />
-          <input
-            type="text"
-            id="dept"
-            name="dept"
-            value={formData.dept}
-            onChange={handleChange}
-            required
-          /><br />
-
-          <label htmlFor="dob">Date of Birth:</label><br />
-          <input
-            type="date"
-            id="dob"
-            name="dob"
-            value={formData.dob}
-            onChange={handleChange}
-            required
-            min="1900-01-01"
-            max="2005-12-31"
           /><br />
 
           <label htmlFor="email">Email:</label><br />
           <input
             type="email"
             id="email"
-            name="email"
             value={formData.email}
             onChange={handleChange}
             required
           /><br />
 
-          <label htmlFor="description">Description:</label><br />
-          <textarea
-            id="description"
-            name="description"
-            value={formData.description}
+          <label htmlFor="phone_number">Phone Number:</label><br />
+          <input
+            type="text"
+            id="phone_number"
+            value={formData.phone_number}
+            onChange={handleChange}
+          /><br />
+
+          <label htmlFor="department">Department:</label><br />
+          <input
+            type="text"
+            id="department"
+            value={formData.department}
             onChange={handleChange}
             required
-          ></textarea><br /><br />
+          /><br />
 
-          <button type="submit">Submit</button><br />
+          <label htmlFor="job_role">Job Role:</label><br />
+          <select id="job_role" value={formData.job_role} onChange={handleChange} required>
+            <option value="">Select Job Role</option>
+            <option value="Developer">Developer</option>
+            <option value="Manager">Manager</option>
+            <option value="HR">HR</option>
+          </select><br />
+
+          <label htmlFor="hire_date">Hire Date:</label><br />
+          <input
+            type="date"
+            id="hire_date"
+            value={formData.hire_date}
+            onChange={handleChange}
+            required
+          /><br />
+
+          <label htmlFor="status">Status:</label><br />
+          <select id="status" value={formData.status} onChange={handleChange} required>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+            <option value="On Leave">On Leave</option>
+          </select><br />
+
+          <label htmlFor="dob">Date of Birth:</label><br />
+          <input
+            type="date"
+            id="dob"
+            value={formData.dob}
+            onChange={handleChange}
+            required
+          /><br /><br />
+
+          <button type="submit">Update Employee</button><br />
         </div>
       </form>
     </>
   );
 }
 
-export default Edit;
+export default EditEmployee;

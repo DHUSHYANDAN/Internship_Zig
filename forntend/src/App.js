@@ -15,7 +15,7 @@ function App() {
         <Route path="/" element={<Viewuser />} />
         <Route path="/addUsers" element={<Adduser />} />
         <Route path="/viewUsers" element={<Viewuser />} />
-        <Route path="/UpdateUsers/:registration_number" element={<Edit />} />
+        <Route path="/UpdateUsers/:employee_code" element={<Edit />} />
         {/* <Route path="/DeleteUsers" element={<Delete />} /> */}
       </Routes>
     </Router>

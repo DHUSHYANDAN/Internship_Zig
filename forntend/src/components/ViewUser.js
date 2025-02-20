@@ -134,7 +134,7 @@ function EmployeeList() {
                 </td>
                 <td className="px-6 py-4">
                   <Link
-                    to={`/editEmployee/${employee.employee_code}`}
+                    to={`/UpdateUsers/${employee.employee_code}`}
                     className="text-blue-600 hover:underline mr-4"
                   >
                     Edit
