@@ -1,29 +1,33 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt');
 
 const DashboardUserSchema = new mongoose.Schema({
     email: { 
         type: String, 
-        required: [true, 'Email is required'],
+        required: true,
         unique: true,
         lowercase: true,
-        trim: true,
-        match: [/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/, 'Please enter a valid email address']
+        trim: true
     },
     employee_code: { 
         type: String, 
-        required: [true, 'Employee code is required'],
-        unique: true,
-        match: [/^[A-Za-z0-9\-]+$/, 'Employee code must contain only alphanumeric characters or hyphens']
+        required: true,
+        unique: true
+    },
+    job_role: { 
+        type: String, 
+        required: true,
+        enum: ['Developer', 'Manager', 'HR', 'Admin']
     },
     password: { 
         type: String, 
-        required: [true, 'Password is required'],
+        required: true,
         minlength: 6
+    },
+    approved: { 
+        type: Boolean, 
+        default: false  // New users are not approved by default
     }
 });
 
-
 const DashboardUser = mongoose.model('DashboardUser', DashboardUserSchema);
-
-module.exports=DashboardUser;
+module.exports = DashboardUser;
