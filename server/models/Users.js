@@ -39,7 +39,7 @@ const EmployeeSchema = new mongoose.Schema({
         type: String, 
         required: [true, 'Job role is required'],
         enum: {
-            values: ['Developer', 'Manager', 'HR'],  
+            values: ['Developer', 'Manager', 'HR','Admin'],  
             message: 'Job role must be either Developer, Manager, or HR' 
         }
     }

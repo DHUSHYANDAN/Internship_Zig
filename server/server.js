@@ -4,8 +4,10 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const path = require('path');
 const routes = require("./routes/routerEmployee");
+const dashRouter = require("./routes/dashboardRouter"); 
 
 const app = express();
+require('dotenv').config();
 const port = 5000;
 
 // Middleware
@@ -14,7 +16,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.json());
 
 // API routes
-app.use('/', routes);
+app.use('/', routes, dashRouter);
 
 //mognodb connection
 mongoose.connect('mongodb://localhost:27017/EmployeeDB', {

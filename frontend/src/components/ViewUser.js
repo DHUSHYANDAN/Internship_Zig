@@ -20,6 +20,7 @@ function EmployeeList() {
     try {
       const response = await fetch(`${baseurl}/viewEmployees`);
       const data = await response.json();
+     
       setEmployees(data);
     } catch (error) {
       console.error("Error fetching employees:", error);
