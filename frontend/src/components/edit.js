@@ -17,6 +17,7 @@ function EditEmployee() {
     dob: "",
   });
 
+  const [errors, setErrors] = useState({});
   const { employee_code } = useParams();
   const navigate = useNavigate();
 
@@ -40,8 +41,31 @@ function EditEmployee() {
     setFormData({ ...formData, [id]: value });
   };
 
+  const validateForm = () => {
+    let newErrors = {};
+    const nameRegex = /^[A-Za-z\s]+$/;
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    const phoneRegex = /^\+?[0-9]{10}$/;
+    const employeeCodeRegex = /^[A-Za-z0-9-]+$/;
+
+    if (!formData.first_name.match(nameRegex)) newErrors.first_name = "First name must only contain letters";
+    if (!formData.last_name.match(nameRegex)) newErrors.last_name = "Last name must only contain letters";
+    if (!formData.email.match(emailRegex)) newErrors.email = "Invalid email format";
+    if (!formData.phone_number.match(phoneRegex)) newErrors.phone_number = "Invalid phone number";
+    if (!formData.employee_code.match(employeeCodeRegex)) newErrors.employee_code = "Invalid employee code";
+    if (!formData.department) newErrors.department = "Department is required";
+    if (!formData.job_role) newErrors.job_role = "Job role is required";
+    if (!formData.hire_date) newErrors.hire_date = "Hire date is required";
+    if (!formData.dob) newErrors.dob = "Date of birth is required";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
+
     try {
       const response = await fetch(`${baseurl}/updateEmployee`, {
         method: "POST",
@@ -53,7 +77,7 @@ function EditEmployee() {
       if (!response.ok) throw new Error(data.error || "Something went wrong!");
 
       alert(data.message);
-      navigate("/viewEmployees");
+      navigate("/view_Employees");
     } catch (error) {
       console.error("Error:", error);
       alert(error.message);
@@ -65,7 +89,7 @@ function EditEmployee() {
       {/* Header */}
       <div className="w-full max-w-3xl flex justify-between items-center bg-blue-500 text-white p-4 rounded-lg shadow-md">
         <h1 className="text-lg font-bold">Edit Employee</h1>
-        <Link to="/viewEmployees" className="bg-white text-blue-500 px-4 py-2 rounded-md hover:bg-gray-200 transition">
+        <Link to="/view_Employees" className="bg-white text-blue-500 px-4 py-2 rounded-md hover:bg-gray-200 transition">
           View Employees
         </Link>
       </div>
@@ -90,10 +114,11 @@ function EditEmployee() {
                 id={id}
                 value={formData[id]}
                 onChange={handleChange}
-                required
+                
                 readOnly={readOnly}
                 className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
+              {errors[id] && <p className="text-red-500 text-sm">{errors[id]}</p>}
             </div>
           ))}
 
@@ -106,6 +131,7 @@ function EditEmployee() {
               <option value="Manager">Manager</option>
               <option value="HR">HR</option>
             </select>
+            {errors.job_role && <p className="text-red-500 text-sm">{errors.job_role}</p>}
           </div>
 
           {/* Status */}

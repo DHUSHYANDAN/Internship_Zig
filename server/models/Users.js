@@ -7,12 +7,13 @@ const EmployeeSchema = new mongoose.Schema({
     first_name: { 
         type: String, 
         required: [true, 'First name is required'],
-        match: [/^[A-Za-z]+$/, 'First name must only contain letters']
+        match: [/^[A-Za-z\s]+$/, 'First name must only contain letters ']
+
     },
     last_name: { 
         type: String, 
         required: [true, 'Last name is required'],
-        match: [/^[A-Za-z]+$/, 'Last name must only contain letters']
+        match: [/^[A-Za-z\s]+$/, 'Last name must only contain letters']
     },
     employee_code: { 
         type: String, 
@@ -28,7 +29,7 @@ const EmployeeSchema = new mongoose.Schema({
     },
     phone_number: { 
         type: String, 
-        match: [/^\+?[0-9]{10,15}$/, 'Please enter a valid phone number']
+        match: [/^\+?[0-9]{10}$/, 'Please enter a valid phone number']
     },
     department: { 
         type: String, 

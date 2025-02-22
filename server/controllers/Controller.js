@@ -116,14 +116,14 @@ module.exports.detailsupdate = async (req, res) => {
  
 // Delete Employee (DELETE Method)
 module.exports.detailsdelete = async (req, res) => {
-    const { employee_code } = req.params;
+    const { employee_code } = req.params;                                                                                                                                                                           
 
     try {
         const result = await Employee.findOneAndDelete({ employee_code });
 
         if (!result) {
             return res.status(404).json({ error: 'No employee found with the provided employee code.' });
-        } else {
+        } else {                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
             res.status(200).json({ message: 'Employee deleted successfully' });
         }
 

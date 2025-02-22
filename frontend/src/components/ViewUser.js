@@ -1,16 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Pagination } from "flowbite-react";
-import { baseurl } from "../url"; 
+import { baseurl } from "../url";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+
+
+
 function EmployeeList() {
   const [employees, setEmployees] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchCategory, setSearchCategory] = useState("All"); 
+  const [searchCategory, setSearchCategory] = useState("All");
   const employeesPerPage = 10;
 
-
-  // Fetch Employees 
   const fetchEmployees = async () => {
     try {
       const response = await fetch(`${baseurl}/viewEmployees`);
@@ -24,7 +29,7 @@ function EmployeeList() {
   useEffect(() => {
     fetchEmployees();
   }, []);
-  // Delete Employee
+
   const handleDelete = async (employee_code) => {
     if (!window.confirm("Are you sure you want to delete this employee?")) return;
 
@@ -37,44 +42,77 @@ function EmployeeList() {
       alert("Failed to delete employee. Try again.");
     }
   };
-// 1️⃣ Filter employees first
-const filteredEmployees = employees.filter((employee) => {
-  if (!searchTerm) return true;
 
-  switch (searchCategory) {
-    case "All":
-      return (
-        `${employee.first_name} ${employee.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        employee.employee_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        employee.job_role.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    case "name":
-      return `${employee.first_name} ${employee.last_name}`.toLowerCase().includes(searchTerm.toLowerCase());
-    case "email":
-      return employee.email.toLowerCase().includes(searchTerm.toLowerCase());
-    case "employee_code":
-      return employee.employee_code.toLowerCase().includes(searchTerm.toLowerCase());
-    case "job_role":
-      return employee.job_role.toLowerCase().includes(searchTerm.toLowerCase());
-    default:
-      return true;
-  }
-});
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, searchCategory]);
 
-// 2️⃣ Reset pagination to Page 1 when search term changes
-useEffect(() => {
-  setCurrentPage(1); // Reset to first page on new search
-}, [searchTerm, searchCategory]);
+  const filteredEmployees = employees.filter((employee) => {
+    if (!searchTerm) return true;
+    switch (searchCategory) {
+      case "All":
+        return (
+          `${employee.first_name} ${employee.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          employee.employee_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          employee.job_role.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      case "name":
+        return `${employee.first_name} ${employee.last_name}`.toLowerCase().includes(searchTerm.toLowerCase());
+      case "email":
+        return employee.email.toLowerCase().includes(searchTerm.toLowerCase());
+      case "employee_code":
+        return employee.employee_code.toLowerCase().includes(searchTerm.toLowerCase());
+      case "job_role":
+        return employee.job_role.toLowerCase().includes(searchTerm.toLowerCase());
+      default:
+        return true;
+    }
+  });
 
-// 3️⃣ Apply pagination AFTER filtering
-const indexOfLastEmployee = currentPage * employeesPerPage;
-const indexOfFirstEmployee = indexOfLastEmployee - employeesPerPage;
-const currentEmployees = filteredEmployees.slice(indexOfFirstEmployee, indexOfLastEmployee);
-const totalPages = Math.ceil(filteredEmployees.length / employeesPerPage);
+  const indexOfLastEmployee = currentPage * employeesPerPage;
+  const indexOfFirstEmployee = indexOfLastEmployee - employeesPerPage;
+  const currentEmployees = filteredEmployees.slice(indexOfFirstEmployee, indexOfLastEmployee);
+  const totalPages = Math.ceil(filteredEmployees.length / employeesPerPage);
 
+  // Export PDF
+  const exportPDF = () => {
+    const doc = new jsPDF();
+    doc.text("Employee List", 14, 10);
+    doc.autoTable({
+      head: [["Name", "Email", "DOB", "Phone", "Code", "Department", "Job Role", "Status"]],
+      body: employees.map(emp => [
+        `${emp.first_name} ${emp.last_name}`, emp.email, emp.dob, emp.phone_number, emp.employee_code, emp.department, emp.job_role, emp.status
+      ])
+    });
+    doc.save("Employee_List.pdf");
+  };
+
+  // Export Excel
+  const exportExcel = () => {
+    const worksheet = XLSX.utils.json_to_sheet(employees);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Employees");
+    XLSX.writeFile(workbook, "Employee_List.xlsx");
+  };
+
+  // Export CSV
+  const exportCSV = () => {
+    const csvData = XLSX.utils.json_to_sheet(employees);
+    const csv = XLSX.utils.sheet_to_csv(csvData);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    saveAs(blob, "Employee_List.csv");
+  };
+
+  
   return (
-    <div className="container mx-auto  p-6">
+    <div className="container mx-auto p-6">
+      <div className="flex flex-wrap gap-4 mb-4">
+        <button onClick={exportPDF} className="bg-red-500 text-white px-4 py-2 rounded">Export PDF</button>
+        <button onClick={exportExcel} className="bg-green-500 text-white px-4 py-2 rounded">Export Excel</button>
+        <button onClick={exportCSV} className="bg-yellow-500 text-white px-4 py-2 rounded">Export CSV</button>
+      </div>
+      
       {/* Search Section with Dropdown */}
       <div className="flex flex-col sm:flex-row items-center gap-4 mb-4">
   {/* Dropdown for Search Category */}
@@ -205,7 +243,7 @@ const totalPages = Math.ceil(filteredEmployees.length / employeesPerPage);
 />
 
 </div>
-
+      
     </div>
   );
 }

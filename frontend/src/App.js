@@ -14,7 +14,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Viewuser />} />
         <Route path="/addUsers" element={<Adduser />} />
-        <Route path="viewEmployees" element={<Viewuser />} />
+        <Route path="view_Employees" element={<Viewuser />} />
         <Route path="/UpdateUsers/:employee_code" element={<Edit />} />
         {/* <Route path="/DeleteUsers" element={<Delete />} /> */}
       </Routes>
