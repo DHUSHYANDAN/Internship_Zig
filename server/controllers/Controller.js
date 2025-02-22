@@ -2,7 +2,7 @@ const moment = require('moment');
 const Employee = require('../models/Users'); 
 
 // Get Employee Details (Get Method)
-module.exports.index = async (req, res) => {
+const index = async (req, res) => {
     try {
         const employees = await Employee.find({});
 
@@ -20,7 +20,7 @@ module.exports.index = async (req, res) => {
 };
 
 // Create Employee (POST Method)
-module.exports.detailspost = async (req, res) => {
+const detailspost = async (req, res) => {
     const { first_name, last_name, employee_code, email, phone_number, department, job_role, dob, hire_date, status } = req.body;
 
     try {
@@ -57,7 +57,7 @@ module.exports.detailspost = async (req, res) => {
 };
 
 // View Employee for Editing (GET Method)
-module.exports.detailsupdateget = async (req, res) => {
+const detailsupdateget = async (req, res) => {
     let employee_code = req.params.employee_code;
 
     try {
@@ -81,7 +81,7 @@ module.exports.detailsupdateget = async (req, res) => {
 };
 
 // Update Employee Details (PUT Method)
-module.exports.detailsupdate = async (req, res) => {
+const detailsupdate = async (req, res) => {
     const { first_name, last_name, employee_code, email, phone_number, department, job_role, dob, hire_date, status } = req.body;
 
     try {
@@ -115,7 +115,7 @@ module.exports.detailsupdate = async (req, res) => {
 };
  
 // Delete Employee (DELETE Method)
-module.exports.detailsdelete = async (req, res) => {
+const detailsdelete = async (req, res) => {
     const { employee_code } = req.params;                                                                                                                                                                           
 
     try {
@@ -132,3 +132,5 @@ module.exports.detailsdelete = async (req, res) => {
         res.status(500).json({ error: 'Error in deleting employee data' });
     }
 };
+
+module.exports = { index, detailspost, detailsupdateget, detailsupdate, detailsdelete };

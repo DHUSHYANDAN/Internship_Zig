@@ -1,22 +1,32 @@
 const express = require('express');
 const router = express.Router();
 
-const EmployeeController = require('../controllers/Controller'); 
+// Import the Employee Controller
+const {index, detailspost, detailsupdateget, detailsupdate, detailsdelete}= require('../controllers/Controller'); 
+
+// Import the ExportDetails Controller
+const { exportCSV, exportExcel, exportPDF } = require("../controllers/ExportDetails");
 
 
-router.get('/viewEmployees', EmployeeController.index);
+router.get('/viewEmployees',index);
 
 
-router.post('/addEmployee', EmployeeController.detailspost);
+router.post('/addEmployee', detailspost);
 
  
-router.get('/updateEmployee/:employee_code', EmployeeController.detailsupdateget);
+router.get('/updateEmployee/:employee_code', detailsupdateget);
 
 
-router.post('/updateEmployee', EmployeeController.detailsupdate);
+router.post('/updateEmployee', detailsupdate);
 
 
-router.delete('/deleteEmployee/:employee_code', EmployeeController.detailsdelete);
+router.delete('/deleteEmployee/:employee_code', detailsdelete);
+
+// Export routes
+
+router.get("/export/csv", exportCSV);
+router.get("/export/excel", exportExcel);
+router.get("/export/pdf", exportPDF);
 
 module.exports = router;
  
