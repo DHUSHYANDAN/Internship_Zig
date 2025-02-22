@@ -78,11 +78,11 @@ function EmployeeList() {
   // Export PDF
   const exportPDF = () => {
     const doc = new jsPDF();
-    doc.text("Employee List", 14, 10);
+    doc.text("Employee List", 15, 12);
     doc.autoTable({
-      head: [["Name", "Email", "DOB", "Phone", "Code", "Department", "Job Role", "Status"]],
-      body: employees.map(emp => [
-        `${emp.first_name} ${emp.last_name}`, emp.email, emp.dob, emp.phone_number, emp.employee_code, emp.department, emp.job_role, emp.status
+      head: [["S.NO","Name", "Email", "DOB", "Phone", "Code", "Department", "Job Role", "Status"]],
+      body: employees.map((emp,index) => [
+        index+1,`${emp.first_name} ${emp.last_name}`, emp.email, emp.dob, emp.phone_number, emp.employee_code, emp.department, emp.job_role, emp.status
       ])
     });
     doc.save("Employee_List.pdf");
@@ -107,15 +107,28 @@ function EmployeeList() {
   
   return (
     <div className="container mx-auto p-6">
-      <div className="flex flex-wrap gap-4 mb-4">
-        <button onClick={exportPDF} className="bg-red-500 text-white px-4 py-2 rounded">Export PDF</button>
-        <button onClick={exportExcel} className="bg-green-500 text-white px-4 py-2 rounded">Export Excel</button>
-        <button onClick={exportCSV} className="bg-yellow-500 text-white px-4 py-2 rounded">Export CSV</button>
-      </div>
+    <div className="mb-4 ">
+  <select
+    onChange={(e) => {
+      if (e.target.value === "pdf") exportPDF();
+      if (e.target.value === "excel") exportExcel();
+      if (e.target.value === "csv") exportCSV();
+     
+    }}
+    className="p-2 border border-gray-300 rounded-md bg-red-500 text-white font-bold"
+  >
+    <option value="">Export Options</option>
+    <option value="pdf">Export PDF</option>
+    <option value="excel">Export Excel</option>
+    <option value="csv">Export CSV</option>
+
+  </select>
+</div>
+
       
-      {/* Search Section with Dropdown */}
+  
       <div className="flex flex-col sm:flex-row items-center gap-4 mb-4">
-  {/* Dropdown for Search Category */}
+
   <select
     className="p-2 border border-blue-300 bg-blue-500  cursor-pointer text-white font-bold outline-none rounded-md w-full sm:w-auto"
     value={searchCategory}
@@ -194,16 +207,17 @@ function EmployeeList() {
           <td className="px-4 py-4 flex space-x-2">
             <Link
               to={`/UpdateUsers/${employee.employee_code}`}
-              className="text-blue-600 hover:underline"
+              className="text-blue-600 hover:underline" title="Edit Employee"
             >
-              Edit
+             <svg class="h-6 w-6 text-gray-900"  viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">  <path stroke="none" d="M0 0h24v24H0z"/>  <path d="M9 7 h-3a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-3" />  <path d="M9 15h3l8.5 -8.5a1.5 1.5 0 0 0 -3 -3l-8.5 8.5v3" />  <line x1="16" y1="5" x2="19" y2="8" /></svg>
             </Link>
             <button
               onClick={() => handleDelete(employee.employee_code)}
-              className="text-red-600 hover:underline"
+              className="text-red-600 hover:underline " title="Delete Employee" 
             >
-              Delete
+            <svg class="h-6 w-6 text-red-500"  width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">  <path stroke="none" d="M0 0h24v24H0z"/>  <line x1="4" y1="7" x2="20" y2="7" />  <line x1="10" y1="11" x2="10" y2="17" />  <line x1="14" y1="11" x2="14" y2="17" />  <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />  <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
             </button>
+            
           </td>
         </tr>
       ))}
