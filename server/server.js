@@ -6,9 +6,10 @@ const path = require('path');
 const routes = require("./routes/routerEmployee");
 const dashRouter = require("./routes/dashboardRouter"); 
 
+
 const app = express();
 require('dotenv').config();
-const port = 5000;
+const port = process.env.PORT ;
 
 // Middleware
 app.use(cors());
@@ -43,4 +44,6 @@ app.get('*', cors(), (req, res) => {
 // Start the server
 app.listen(port, () => {
   console.log(`Server is running on ${port}`);
+ 
+  
 });

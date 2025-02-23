@@ -25,7 +25,11 @@ const DashboardUserSchema = new mongoose.Schema({
     },
     approved: { 
         type: Boolean, 
-        default: false  // New users are not approved by default
+        default: false  
+    },
+    approvalToken: { 
+        type: String,  // Store the approval token
+        default: null
     }
 });
 
