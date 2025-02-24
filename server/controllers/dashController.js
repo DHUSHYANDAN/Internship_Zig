@@ -108,6 +108,9 @@ exports.approveUser = async (req, res) => {
 };
 
 
+
+
+
 exports.signin = async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -135,11 +138,24 @@ exports.signin = async (req, res) => {
         );
         
 
-        res.json({ token, message: 'Login successful' });
+        res.json({ token, job_role: user.job_role, message: 'Login successful' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 };
 
 
+exports.getUnapprovedUsers = async (req, res) => {
+    try {
+        const unapprovedUsers = await DashboardUser.find({ approved: false }).select('email');
+
+        if (unapprovedUsers.length === 0) {
+            return res.status(404).json({ message: 'No unapproved users found.' });
+        }
+
+        res.status(200).json(unapprovedUsers);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
 

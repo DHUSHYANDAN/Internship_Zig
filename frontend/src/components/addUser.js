@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { baseurl } from "../url";
@@ -19,6 +19,13 @@ function AddEmployee() {
 
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
+  const job_role = localStorage.getItem("job_role");
+  useEffect(() => {
+    if (job_role !== "Admin" && job_role!=="Manager" )
+       {alert("You not have the acess to Add users!");
+        navigate("/view_Employees")};
+  }, [job_role,navigate]);
+
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -58,7 +65,7 @@ function AddEmployee() {
       });
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Something went wrong!");
+      if (!response.ok) throw new Error(data.error || "You not have the acess to Add users!");
 
       alert(data.message);
       setFormData({

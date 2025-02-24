@@ -16,33 +16,77 @@ function EmployeeList() {
   const [searchCategory, setSearchCategory] = useState("All");
   const employeesPerPage = 10;
 
+  const job_role=localStorage.getItem("job_role");
+
   const fetchEmployees = async () => {
+    const token = localStorage.getItem("token");
+   
+  
+    if (!token) {
+      alert("Access denied. Please log in.");
+      window.location.href = "/signin";
+      return;
+    }
+  
     try {
-      const response = await fetch(`${baseurl}/viewEmployees`);
+      const response = await fetch(`${baseurl}/viewEmployees`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, 
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error("You not have the access to this page");
+       
+      }
+  
       const data = await response.json();
-     
       setEmployees(data);
     } catch (error) {
       console.error("Error fetching employees:", error);
+      alert(error.message);
+      window.location.href = "/dashboard";
+
     }
   };
-
+  
   useEffect(() => {
     fetchEmployees();
   }, []);
 
   const handleDelete = async (employee_code) => {
     if (!window.confirm("Are you sure you want to delete this employee?")) return;
-
+  
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Access denied. Please log in.");
+      window.location.href = "/signin";
+      return;
+    }
+  
     try {
-      await fetch(`${baseurl}/deleteEmployee/${employee_code}`, { method: "DELETE" });
+      const response = await fetch(`${baseurl}/deleteEmployee/${employee_code}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`, // Attach token
+        },
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to delete employee. Please check authentication.");
+      }
+  
       alert("Employee deleted successfully!");
       fetchEmployees();
     } catch (error) {
       console.error("Error deleting employee:", error);
-      alert("Failed to delete employee. Try again.");
+      alert(error.message);
     }
   };
+
+  
 
   useEffect(() => {
     setCurrentPage(1);
@@ -153,11 +197,14 @@ function EmployeeList() {
 
   {/* Add Employee Button */}
   <Link
-    to={'/addUsers'}
-    className="bg-blue-500 md:w-2/6 w-full lg:w-1/6 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition-all"
-  >
-    + Add Employee
-  </Link>
+  to="/addUsers"
+  className={`bg-blue-500 md:w-2/6 w-full lg:w-1/6 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition-all ${
+    job_role === "Admin" || job_role === "Manager" ? "" : "hidden"
+  }`}
+>
+  + Add Employee
+</Link>
+
 </div>
 
 
@@ -177,7 +224,8 @@ function EmployeeList() {
         <th className="px-4 py-3">Department</th>
         <th className="px-4 py-3">Job Role</th>
         <th className="px-4 py-3">Status</th>
-        <th className="px-4 py-3">Actions</th>
+        {job_role === "Admin" || job_role === "Manager" ? <th className="px-4 py-3">Actions</th> : null}
+      
       </tr>
     </thead>
 
@@ -205,21 +253,24 @@ function EmployeeList() {
             ></span>
             {employee.status}
           </td>
+          {job_role === "Admin" || job_role === "Manager" ?
           <td className="px-4 py-4 flex space-x-2">
             <Link
               to={`/UpdateUsers/${employee.employee_code}`}
               className="text-blue-600 hover:underline" title="Edit Employee"
             >
-             <svg class="h-6 w-6 text-gray-900"  viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">  <path stroke="none" d="M0 0h24v24H0z"/>  <path d="M9 7 h-3a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-3" />  <path d="M9 15h3l8.5 -8.5a1.5 1.5 0 0 0 -3 -3l-8.5 8.5v3" />  <line x1="16" y1="5" x2="19" y2="8" /></svg>
+             <svg className="h-6 w-6 text-gray-900"  viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">  <path stroke="none" d="M0 0h24v24H0z"/>  <path d="M9 7 h-3a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-3" />  <path d="M9 15h3l8.5 -8.5a1.5 1.5 0 0 0 -3 -3l-8.5 8.5v3" />  <line x1="16" y1="5" x2="19" y2="8" /></svg>
             </Link>
             <button
               onClick={() => handleDelete(employee.employee_code)}
               className="text-red-600 hover:underline " title="Delete Employee" 
             >
-            <svg class="h-6 w-6 text-red-500"  width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">  <path stroke="none" d="M0 0h24v24H0z"/>  <line x1="4" y1="7" x2="20" y2="7" />  <line x1="10" y1="11" x2="10" y2="17" />  <line x1="14" y1="11" x2="14" y2="17" />  <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />  <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
+            <svg className="h-6 w-6 text-red-500"  width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">  <path stroke="none" d="M0 0h24v24H0z"/>  <line x1="4" y1="7" x2="20" y2="7" />  <line x1="10" y1="11" x2="10" y2="17" />  <line x1="14" y1="11" x2="14" y2="17" />  <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />  <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
             </button>
             
           </td>
+          
+        : null}
         </tr>
       ))}
     </tbody>

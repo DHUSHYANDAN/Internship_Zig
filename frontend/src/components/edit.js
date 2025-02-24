@@ -21,20 +21,46 @@ function EditEmployee() {
   const { employee_code } = useParams();
   const navigate = useNavigate();
 
+  // 🔹 Get token from local storage
+  const token = localStorage.getItem("token");
+  
+
+  
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`${baseurl}/updateEmployee/${employee_code}`);
-        if (!response.ok) throw new Error("Failed to fetch employee details.");
+        const response = await fetch(`${baseurl}/updateEmployee/${employee_code}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // 🔹 Send token for authentication
+          },
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error("Unauthorized: Please log in again.");
+          }
+          throw new Error("you not have the acess to Edit users! or delete Users ");
+        }
+
         const data = await response.json();
         setFormData(data);
       } catch (error) {
         console.error("Error fetching data:", error);
+        alert(error.message); 
+        navigate("/view_Employees");
       }
     };
 
-    fetchData();
-  }, [employee_code]);
+    if (token) {
+      fetchData();
+    } else {
+      alert("Unauthorized: Please log in first.");
+      navigate("/SignIn");
+    }
+  }, [employee_code, token, navigate]);
 
   const handleChange = (e) => {
     const { id, value } = e.target;
@@ -69,7 +95,10 @@ function EditEmployee() {
     try {
       const response = await fetch(`${baseurl}/updateEmployee`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // 🔹 Send token for authentication
+        },
         body: JSON.stringify(formData),
       });
 
@@ -114,7 +143,6 @@ function EditEmployee() {
                 id={id}
                 value={formData[id]}
                 onChange={handleChange}
-                
                 readOnly={readOnly}
                 className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
