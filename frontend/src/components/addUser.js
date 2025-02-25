@@ -16,6 +16,7 @@ function AddEmployee() {
     status: "Active",
     dob: "",
   });
+  const token = localStorage.getItem("token");
 
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
@@ -60,7 +61,7 @@ function AddEmployee() {
     try {
       const response = await fetch(`${baseurl}/addEmployee`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}`,  },
         body: JSON.stringify(formData),
       });
 
@@ -71,7 +72,7 @@ function AddEmployee() {
       setFormData({
         first_name: "",
         last_name: "",
-        employee_code: "",
+       
         email: "",
         phone_number: "",
         department: "",
@@ -102,7 +103,7 @@ function AddEmployee() {
           {[
             { label: "First Name", id: "first_name", type: "text" },
             { label: "Last Name", id: "last_name", type: "text" },
-            { label: "Employee Code", id: "employee_code", type: "text" },
+        
             { label: "Email", id: "email", type: "email" },
             { label: "Phone Number", id: "phone_number", type: "text" },
             { label: "Department", id: "department", type: "text" },
@@ -116,6 +117,8 @@ function AddEmployee() {
                 id={id}
                 value={formData[id]}
                 onChange={handleChange}
+              
+                max="2024-12-31"
                 className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
               {errors[id] && <p className="text-red-500 text-sm">{errors[id]}</p>}

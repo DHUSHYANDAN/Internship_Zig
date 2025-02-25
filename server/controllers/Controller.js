@@ -21,7 +21,7 @@ const index = async (req, res) => {
 
 // Create Employee (POST Method)
 const detailspost = async (req, res) => {
-    const { first_name, last_name, employee_code, email, phone_number, department, job_role, dob, hire_date, status } = req.body;
+    const { first_name, last_name,  email, phone_number, department, job_role, dob, hire_date, status } = req.body;
 
     try {
         const existingEmployee = await Employee.findOne({ employee_code });
@@ -37,7 +37,7 @@ const detailspost = async (req, res) => {
         const newEmployee = new Employee({
             first_name,
             last_name,
-            employee_code,
+           
             email,
             phone_number,
             department,

@@ -28,6 +28,8 @@ exports.signup = async (req, res) => {
         const approvalToken = crypto.randomBytes(32).toString('hex'); // Generate a random token
         
         const newUser = new DashboardUser({
+            first_name: employeeExists.first_name,
+            last_name: employeeExists.last_name,
             email,
             employee_code,
             job_role: employeeExists.job_role,
@@ -138,7 +140,8 @@ exports.signin = async (req, res) => {
         );
         
 
-        res.json({ token, job_role: user.job_role, message: 'Login successful' });
+        res.json({ token, job_role: user.job_role,email: user.email, 
+            first_name: user.first_name,last_name:user.last_name,  message: 'Login successful' });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }

@@ -1,6 +1,17 @@
 const mongoose = require('mongoose');
 
 const DashboardUserSchema = new mongoose.Schema({
+    first_name: { 
+        type: String, 
+        required: [true, 'First name is required'],
+        match: [/^[A-Za-z\s]+$/, 'First name must only contain letters ']
+
+    },
+    last_name: { 
+        type: String, 
+        required: [true, 'Last name is required'],
+        match: [/^[A-Za-z\s]+$/, 'Last name must only contain letters']
+    },
     email: { 
         type: String, 
         required: true,

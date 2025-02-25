@@ -8,7 +8,6 @@ const EmployeeSchema = new mongoose.Schema({
         type: String, 
         required: [true, 'First name is required'],
         match: [/^[A-Za-z\s]+$/, 'First name must only contain letters ']
-
     },
     last_name: { 
         type: String, 
@@ -17,9 +16,7 @@ const EmployeeSchema = new mongoose.Schema({
     },
     employee_code: { 
         type: String, 
-        required: [true, 'Employee code is required'],
-        unique: true,
-        match: [/^[A-Za-z0-9\-]+$/, 'Employee code must contain only alphanumeric characters or hyphens']
+        unique: true
     },
     email: { 
         type: String, 
@@ -39,11 +36,10 @@ const EmployeeSchema = new mongoose.Schema({
         type: String, 
         required: [true, 'Job role is required'],
         enum: {
-            values: ['Developer', 'Manager', 'HR','Admin'],  
-            message: 'Job role must be either Developer, Manager, or HR' 
+            values: ['Developer', 'Manager', 'HR', 'Admin'],  
+            message: 'Job role must be either Developer, Manager, HR, or Admin' 
         }
-    }
-    ,
+    },
     hire_date: { 
         type: Date, 
         required: [true, 'Hire date is required'],
@@ -74,8 +70,31 @@ const EmployeeSchema = new mongoose.Schema({
     }
 });
 
-// Add AutoIncrement Plugin
+// Auto Increment Plugin for `id`
 EmployeeSchema.plugin(AutoIncrement, { inc_field: 'id' });
+
+// Pre-save middleware to generate employee_code
+EmployeeSchema.pre('save', async function (next) {
+    if (!this.employee_code) {
+        const currentYear = new Date().getFullYear().toString();
+        const lastEmployee = await mongoose.model('Employee').findOne().sort({ id: -1 });
+
+        let nextNumber = "001"; // Default for first employee of the year
+
+        if (lastEmployee && lastEmployee.employee_code) {
+            const lastCode = lastEmployee.employee_code;
+            const lastYear = lastCode.substring(3, 7);
+            const lastSequence = parseInt(lastCode.substring(7), 10);
+
+            if (lastYear === currentYear) {
+                nextNumber = String(lastSequence + 1).padStart(3, "0");
+            }
+        }
+
+        this.employee_code = `EMP${currentYear}${nextNumber}`;
+    }
+    next();
+});
 
 // Create a model based on the schema
 const Employee = mongoose.model('Employee', EmployeeSchema);

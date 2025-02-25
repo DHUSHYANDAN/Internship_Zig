@@ -135,23 +135,30 @@ function EmployeeList() {
 
   // Export Excel
   const exportExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(employees);
+    // Remove 'id' field from employees array
+    const filteredEmployees = employees.map(({ _id,hire_date, ...rest }) => rest);
+  
+    const worksheet = XLSX.utils.json_to_sheet(filteredEmployees);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Employees");
     XLSX.writeFile(workbook, "Employee_List.xlsx");
   };
-
+  
   // Export CSV
   const exportCSV = () => {
-    const csvData = XLSX.utils.json_to_sheet(employees);
+    // Remove 'id' field from employees array
+    const filteredEmployees = employees.map(({ _id,hire_date, ...rest }) => rest);
+  
+    const csvData = XLSX.utils.json_to_sheet(filteredEmployees);
     const csv = XLSX.utils.sheet_to_csv(csvData);
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     saveAs(blob, "Employee_List.csv");
   };
+  
 
   
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto  p-6">
     <div className="mb-4 ">
   <select
     onChange={(e) => {

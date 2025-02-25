@@ -16,19 +16,45 @@ const SignUp = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const validateField = (name, value) => {
+    let error = "";
+    switch (name) {
+      case "email":
+        if (!value) {
+          error = "Email is required";
+        } else if (!/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(value)) {
+          error = "Invalid email address";
+        }
+        break;
+      case "employeeId":
+        if (!value) error = "Employee ID is required";
+        break;
+      case "password":
+        if (!value) error = "Password is required";
+        else if (value.length < 6) error = "Password must be at least 6 characters";
+        break;
+      case "confirmPassword":
+        if (!value) error = "Please confirm your password";
+        else if (value !== formData.password) error = "Passwords do not match";
+        break;
+      default:
+        break;
+    }
+    return error;
+  };
+
+  const handleBlur = (e) => {
+    const { name, value } = e.target;
+    const error = validateField(name, value);
+    setErrors((prevErrors) => ({ ...prevErrors, [name]: error }));
+  };
+
   const validateForm = () => {
     let errors = {};
-    if (!formData.email) {
-      errors.email = "Email is required";
-    } else if (!/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(formData.email)) {
-      errors.email = "Invalid email address";
-    }
-    if (!formData.employeeId) errors.employeeId = "Employee ID is required";
-    if (!formData.password) errors.password = "Password is required";
-    else if (formData.password.length < 6) errors.password = "Password must be at least 6 characters";
-    if (!formData.confirmPassword) errors.confirmPassword = "Please confirm your password";
-    else if (formData.password !== formData.confirmPassword) errors.confirmPassword = "Passwords do not match";
-    
+    Object.keys(formData).forEach((key) => {
+      const error = validateField(key, formData[key]);
+      if (error) errors[key] = error;
+    });
     setErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -61,7 +87,7 @@ const SignUp = () => {
   };
 
   return (
-    <section className="flex flex-col items-center pt-6">
+    <section className="flex flex-col min-h-screen items-center justify-center">
       <div className="w-full bg-white rounded-lg shadow border sm:max-w-md p-6">
         <h1 className="text-xl font-bold text-gray-900 mb-4">Create an Account</h1>
         <form className="space-y-4" onSubmit={handleSubmit}>
@@ -73,6 +99,7 @@ const SignUp = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
+              onBlur={handleBlur}
               className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg block w-full p-2.5"
               placeholder="johndoe@example.com"
             />
@@ -86,6 +113,7 @@ const SignUp = () => {
               name="employeeId"
               value={formData.employeeId}
               onChange={handleChange}
+              onBlur={handleBlur}
               className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg block w-full p-2.5"
               placeholder="Enter the Employee Id"
             />
@@ -99,6 +127,7 @@ const SignUp = () => {
               name="password"
               value={formData.password}
               onChange={handleChange}
+              onBlur={handleBlur}
               className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg block w-full p-2.5"
               placeholder="••••••••"
             />
@@ -112,6 +141,7 @@ const SignUp = () => {
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
+              onBlur={handleBlur}
               className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg block w-full p-2.5"
               placeholder="••••••••"
             />
