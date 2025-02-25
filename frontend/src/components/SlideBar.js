@@ -27,13 +27,13 @@ const SlideBar = () => {
 
         {/* Sidebar */}
         <div
-          className={`fixed top-0 left-0 h-screen bg-white dark:bg-gray-800 shadow-lg overflow-y-auto w-64 p-4 transition-transform duration-300 ease-in-out z-30 ${
+          className={`fixed top-0 left-0 h-screen bg-white  shadow-lg overflow-y-auto w-64 p-4 transition-transform duration-300 ease-in-out z-30 ${
             isOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
           {/* Close Button */}
           <button
-            className="text-gray-600 dark:text-gray-300 absolute top-4 right-4 text-2xl"
+            className="text-gray-600  absolute top-4 right-4 text-2xl"
             onClick={() => setIsOpen(false)}
           >
             ✕
@@ -62,12 +62,12 @@ const SlideBar = () => {
               </Link>
             </li>
             <li>
-              <Link
+             { job_role==='Admin'|| job_role==='Manager' ? <Link
                 to="/requested-Employees"
                 className="block p-2 text-gray-900 rounded-lg hover:bg-gray-200"
               >
                 Requested Employees
-              </Link>
+              </Link>:null}
             </li>
             <li>
               <Link

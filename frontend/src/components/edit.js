@@ -144,6 +144,7 @@ function EditEmployee() {
                 value={formData[id]}
                 onChange={handleChange}
                 readOnly={readOnly}
+                 max="2025-01-01"
                 className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
               {errors[id] && <p className="text-red-500 text-sm">{errors[id]}</p>}

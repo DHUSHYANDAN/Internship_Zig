@@ -21,23 +21,19 @@ const index = async (req, res) => {
 
 // Create Employee (POST Method)
 const detailspost = async (req, res) => {
-    const { first_name, last_name,  email, phone_number, department, job_role, dob, hire_date, status } = req.body;
+    const { first_name, last_name, email, phone_number, department, job_role, dob, hire_date, status } = req.body;
 
     try {
-        const existingEmployee = await Employee.findOne({ employee_code });
+        // Check for duplicate email
         const existingEmployeeEmail = await Employee.findOne({ email });
-                
-
-        if (existingEmployee) {
-            return res.status(400).json({ error: 'Duplicate employee code. Please use a different code.' });
-        }
-        else if (existingEmployeeEmail) {
+        if (existingEmployeeEmail) {
             return res.status(400).json({ error: 'Duplicate email. Please use a different email.' });
         }
+
+        // Create new employee
         const newEmployee = new Employee({
             first_name,
             last_name,
-           
             email,
             phone_number,
             department,
@@ -48,13 +44,15 @@ const detailspost = async (req, res) => {
         });
 
         await newEmployee.save();
-        res.status(200).json({ message: 'Employee created successfully' });
+
+        res.status(200).json({ message: 'Employee created successfully', employee_code: newEmployee.employee_code });
 
     } catch (err) {
         console.error('Error saving employee', err);
         res.status(500).json({ error: 'Error saving employee' });
     }
 };
+
 
 // View Employee for Editing (GET Method)
 const detailsupdateget = async (req, res) => {
