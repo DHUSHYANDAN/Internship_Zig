@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { baseurl } from '../url';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const SignIn = () => {
   const [formData, setFormData] = useState({ email: '', password: '' });
@@ -43,19 +45,20 @@ const SignIn = () => {
       if (!response.ok) {
         throw new Error(data.message || 'Sign-in failed');
       }
-      alert('Login successful!');
+      toast.success('Login successful!');
       localStorage.setItem('token', data.token);
       localStorage.setItem('job_role', data.job_role);
       localStorage.setItem('last_name', data.last_name);
       localStorage.setItem('first_name', data.first_name);
       setTimeout(() => (window.location.href = '/dashboard'), 1000);
     } catch (error) {
-      alert(error.message);
+      toast.error(error.message);
     }
   };
 
   return (
     <section className="flex flex-col items-center justify-center min-h-screen pt-6">
+      <ToastContainer position="top-right" autoClose={3000} />
       <div className="w-full bg-white rounded-lg shadow border sm:max-w-md p-6">
         <h1 className="text-xl font-bold text-gray-900 mb-4">Sign In</h1>
         <form className="space-y-4" onSubmit={handleSubmit}>

@@ -25,6 +25,7 @@ const RequestedEmpl = () => {
           <tr className="bg-gray-100">
             <th className="border p-2">S. NO</th>
             <th className="border p-2">Email</th>
+            <th className="border p-2">Role</th>
             <th className="border p-2">Status</th>
           </tr>
         </thead>
@@ -34,6 +35,7 @@ const RequestedEmpl = () => {
               <tr key={index} className="border">
                 <td className="border text-center p-2">{index + 1}</td>
                 <td className="border p-2">{user.email}</td>
+                <td className="border p-2">{user.job_role}</td>
                 <td className="border p-2 text-red-500 font-bold">Pending</td>
               </tr>
             ))

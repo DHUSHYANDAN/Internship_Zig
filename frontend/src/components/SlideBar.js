@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 
 const SlideBar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -27,13 +27,13 @@ const SlideBar = () => {
 
         {/* Sidebar */}
         <div
-          className={`fixed top-0 left-0 h-screen bg-white  shadow-lg overflow-y-auto w-64 p-4 transition-transform duration-300 ease-in-out z-30 ${
+          className={`fixed top-0 left-0 h-screen bg-white shadow-lg overflow-y-auto w-64 p-4 transition-transform duration-300 ease-in-out z-30 ${
             isOpen ? "translate-x-0" : "-translate-x-full"
           }`}
         >
           {/* Close Button */}
           <button
-            className="text-gray-600  absolute top-4 right-4 text-2xl"
+            className="text-gray-600 absolute top-4 right-4 text-2xl"
             onClick={() => setIsOpen(false)}
           >
             ✕
@@ -46,44 +46,66 @@ const SlideBar = () => {
           </h2>
           <ul className="space-y-2 font-medium">
             <li>
-              <Link
+              <NavLink
                 to="/dashboard"
-                className="block p-2 text-gray-900 rounded-lg hover:bg-gray-200"
+                className={({ isActive }) =>
+                  `block p-2 rounded-lg ${
+                    isActive ? "bg-blue-500 text-white" : "text-gray-900 hover:bg-gray-200"
+                  }`
+                }
               >
                 Employees Overview
-              </Link>
+              </NavLink>
             </li>
             <li>
-              <Link
+              <NavLink
                 to="/view_Employees"
-                className="block p-2 text-gray-900 rounded-lg hover:bg-gray-200"
+                className={({ isActive }) =>
+                  `block p-2 rounded-lg ${
+                    isActive ? "bg-blue-500 text-white" : "text-gray-900 hover:bg-gray-200"
+                  }`
+                }
               >
                 Manage Employees
-              </Link>
+              </NavLink>
             </li>
+            {job_role === "Admin" || job_role === "Manager" ? (
+              <li>
+                <NavLink
+                  to="/requested-Employees"
+                  className={({ isActive }) =>
+                    `block p-2 rounded-lg ${
+                      isActive ? "bg-blue-500 text-white" : "text-gray-900 hover:bg-gray-200"
+                    }`
+                  }
+                >
+                  Requested Employees
+                </NavLink>
+              </li>
+            ) : null}
             <li>
-             { job_role==='Admin'|| job_role==='Manager' ? <Link
-                to="/requested-Employees"
-                className="block p-2 text-gray-900 rounded-lg hover:bg-gray-200"
-              >
-                Requested Employees
-              </Link>:null}
-            </li>
-            <li>
-              <Link
+              <NavLink
                 to="/signin"
-                className="block p-2 text-gray-900 rounded-lg hover:bg-gray-200"
+                className={({ isActive }) =>
+                  `block p-2 rounded-lg ${
+                    isActive ? "bg-blue-500 text-white" : "text-gray-900 hover:bg-gray-200"
+                  }`
+                }
               >
                 Sign In
-              </Link>
+              </NavLink>
             </li>
             <li>
-              <Link
+              <NavLink
                 to="/signup"
-                className="block p-2 text-gray-900 rounded-lg hover:bg-gray-200"
+                className={({ isActive }) =>
+                  `block p-2 rounded-lg ${
+                    isActive ? "bg-blue-500 text-white" : "text-gray-900 hover:bg-gray-200"
+                  }`
+                }
               >
                 Sign Up
-              </Link>
+              </NavLink>
             </li>
           </ul>
         </div>

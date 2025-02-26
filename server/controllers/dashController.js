@@ -16,7 +16,7 @@ exports.signup = async (req, res) => {
 
         const employeeExists = await Employee.findOne({ email, employee_code });
         if (!employeeExists) {
-            return res.status(400).json({ message: 'Invalid User Registeration. Email or employeeid is wrong ' });
+            return res.status(400).json({ message: 'Invalid User Registeration. Email or employee Id is wrong ' });
         }
 
         const userExists = await DashboardUser.findOne({ email });
@@ -150,7 +150,7 @@ exports.signin = async (req, res) => {
 
 exports.getUnapprovedUsers = async (req, res) => {
     try {
-        const unapprovedUsers = await DashboardUser.find({ approved: false }).select('email');
+        const unapprovedUsers = await DashboardUser.find({ approved: false });
 
         if (unapprovedUsers.length === 0) {
             return res.status(404).json({ message: 'No unapproved users found.' });

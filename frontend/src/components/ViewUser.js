@@ -6,7 +6,8 @@ import jsPDF from "jspdf";
 import "jspdf-autotable";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 
 function EmployeeList() {
@@ -23,7 +24,7 @@ function EmployeeList() {
    
   
     if (!token) {
-      alert("Access denied. Please log in.");
+      toast.warning("Access denied. Please log in.");
       window.location.href = "/signin";
       return;
     }
@@ -46,7 +47,7 @@ function EmployeeList() {
       setEmployees(data);
     } catch (error) {
       console.error("Error fetching employees:", error);
-      alert(error.message);
+      toast.error(error.message);
       window.location.href = "/dashboard";
 
     }
@@ -61,7 +62,7 @@ function EmployeeList() {
   
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("Access denied. Please log in.");
+      toast.warning("Access denied. Please log in.");
       window.location.href = "/signin";
       return;
     }
@@ -78,11 +79,11 @@ function EmployeeList() {
         throw new Error("Failed to delete employee. Please check authentication.");
       }
   
-      alert("Employee deleted successfully!");
+      toast.success("Employee deleted successfully!");
       fetchEmployees();
     } catch (error) {
       console.error("Error deleting employee:", error);
-      alert(error.message);
+      toast.error(error.message);
     }
   };
 
@@ -136,7 +137,7 @@ function EmployeeList() {
   // Export Excel
   const exportExcel = () => {
     // Remove 'id' field from employees array
-    const filteredEmployees = employees.map(({ _id,hire_date, ...rest }) => rest);
+    const filteredEmployees = employees.map(({ _id,hire_date,id,__v, ...rest }) => rest);
   
     const worksheet = XLSX.utils.json_to_sheet(filteredEmployees);
     const workbook = XLSX.utils.book_new();
@@ -147,7 +148,7 @@ function EmployeeList() {
   // Export CSV
   const exportCSV = () => {
     // Remove 'id' field from employees array
-    const filteredEmployees = employees.map(({ _id,hire_date, ...rest }) => rest);
+    const filteredEmployees = employees.map(({ _id,hire_date,id,__v, ...rest }) => rest);
   
     const csvData = XLSX.utils.json_to_sheet(filteredEmployees);
     const csv = XLSX.utils.sheet_to_csv(csvData);

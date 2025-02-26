@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { baseurl } from "../url";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function EditEmployee() {
   const [formData, setFormData] = useState({
@@ -20,12 +22,7 @@ function EditEmployee() {
   const [errors, setErrors] = useState({});
   const { employee_code } = useParams();
   const navigate = useNavigate();
-
-  // 🔹 Get token from local storage
   const token = localStorage.getItem("token");
-  
-
-  
 
   useEffect(() => {
     const fetchData = async () => {
@@ -34,7 +31,7 @@ function EditEmployee() {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`, // 🔹 Send token for authentication
+            Authorization: `Bearer ${token}`,
           },
         });
 
@@ -42,14 +39,14 @@ function EditEmployee() {
           if (response.status === 401) {
             throw new Error("Unauthorized: Please log in again.");
           }
-          throw new Error("you not have the acess to Edit users! or delete Users ");
+          throw new Error("You do not have access to edit or delete users!");
         }
 
         const data = await response.json();
         setFormData(data);
       } catch (error) {
         console.error("Error fetching data:", error);
-        alert(error.message); 
+        toast.error(error.message);
         navigate("/view_Employees");
       }
     };
@@ -57,7 +54,7 @@ function EditEmployee() {
     if (token) {
       fetchData();
     } else {
-      alert("Unauthorized: Please log in first.");
+      toast.warning("Unauthorized: Please log in first.");
       navigate("/SignIn");
     }
   }, [employee_code, token, navigate]);
@@ -97,7 +94,7 @@ function EditEmployee() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // 🔹 Send token for authentication
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(formData),
       });
@@ -105,16 +102,20 @@ function EditEmployee() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Something went wrong!");
 
-      alert(data.message);
-      navigate("/view_Employees");
+      toast.success("Employee updated successfully!");
+      setTimeout(() => {
+        navigate("/view_Employees");
+      }, 2000);
     } catch (error) {
       console.error("Error:", error);
-      alert(error.message);
+      toast.error(error.message);
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-gray-100 p-6">
+      <ToastContainer position="top-right" autoClose={3000} />
+      
       {/* Header */}
       <div className="w-full max-w-3xl flex justify-between items-center bg-blue-500 text-white p-4 rounded-lg shadow-md">
         <h1 className="text-lg font-bold">Edit Employee</h1>
@@ -144,7 +145,7 @@ function EditEmployee() {
                 value={formData[id]}
                 onChange={handleChange}
                 readOnly={readOnly}
-                 max="2025-01-01"
+                max="2025-01-01"
                 className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
               {errors[id] && <p className="text-red-500 text-sm">{errors[id]}</p>}

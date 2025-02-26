@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { baseurl } from "../url";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -20,11 +22,9 @@ const SignUp = () => {
     let error = "";
     switch (name) {
       case "email":
-        if (!value) {
-          error = "Email is required";
-        } else if (!/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(value)) {
+        if (!value) error = "Email is required";
+        else if (!/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(value))
           error = "Invalid email address";
-        }
         break;
       case "employeeId":
         if (!value) error = "Employee ID is required";
@@ -74,20 +74,21 @@ const SignUp = () => {
         }),
       });
       const data = await response.json();
-      if (response.ok) {
-        alert(data.message);
-        navigate("/signin");
 
+      if (response.ok) {
+        toast.success(data.message, { autoClose: 2000 });
+        setTimeout(() => navigate("/signin"), 2500);
       } else {
-        alert(data.message || "Something went wrong.");
+        toast.error(data.message || "Something went wrong.");
       }
     } catch (error) {
-      alert("Network or server error. Please try again.");
+      toast.error("Network or server error. Please try again.");
     }
   };
 
   return (
     <section className="flex flex-col min-h-screen items-center justify-center">
+      <ToastContainer position="top-right" />
       <div className="w-full bg-white rounded-lg shadow border sm:max-w-md p-6">
         <h1 className="text-xl font-bold text-gray-900 mb-4">Create an Account</h1>
         <form className="space-y-4" onSubmit={handleSubmit}>
@@ -147,8 +148,12 @@ const SignUp = () => {
             />
             {errors.confirmPassword && <p className="text-red-500 text-sm">{errors.confirmPassword}</p>}
           </div>
-          <button type="submit" className="w-full text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg text-sm px-5 py-2.5">Create an Account</button>
-          <p className="text-sm text-gray-900">Already have an account? <a className="font-medium text-blue-600 hover:underline" href="/signin">Sign in here</a></p>
+          <button type="submit" className="w-full text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg text-sm px-5 py-2.5">
+            Create an Account
+          </button>
+          <p className="text-sm text-gray-900">
+            Already have an account? <a className="font-medium text-blue-600 hover:underline" href="/signin">Sign in here</a>
+          </p>
         </form>
       </div>
     </section>

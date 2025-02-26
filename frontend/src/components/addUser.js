@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { baseurl } from "../url";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function AddEmployee() {
   const [formData, setFormData] = useState({
@@ -24,7 +26,7 @@ function AddEmployee() {
   // Restrict access to Admin and Manager
   useEffect(() => {
     if (job_role !== "Admin" && job_role !== "Manager") {
-      alert("You do not have access to add employees!");
+      toast.error("You do not have access to add employees!");
       navigate("/view_Employees");
     }
   }, [job_role, navigate]);
@@ -41,7 +43,6 @@ function AddEmployee() {
     const nameRegex = /^[A-Za-z\s]+$/;
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
     const phoneRegex = /^\+?[0-9]{10}$/;
-    
 
     switch (id) {
       case "first_name":
@@ -56,8 +57,6 @@ function AddEmployee() {
         break;
       case "department":
       case "job_role":
-        if (!value) errorMsg = "This field is required";
-        break;
       case "hire_date":
       case "dob":
         if (!value) errorMsg = "This field is required";
@@ -96,7 +95,7 @@ function AddEmployee() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Error adding employee");
 
-      alert("Employee added successfully!");
+    
       setFormData({
         first_name: "",
         last_name: "",
@@ -108,16 +107,19 @@ function AddEmployee() {
         status: "Active",
         dob: "",
       });
-
-      navigate("/view_Employees");
+      toast.success("Employee added successfully!");
+      setTimeout(() => {
+        navigate("/view_Employees");
+      }, 1000);
     } catch (error) {
-      console.error("Error:", error);
-      alert(error.message);
+      toast.error(error.message);
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-gray-100 p-6">
+      <ToastContainer />
+
       {/* Header Section */}
       <div className="w-full max-w-3xl flex justify-between items-center bg-blue-500 text-white p-4 rounded-lg shadow-md">
         <h1 className="text-lg font-bold">Add Employee</h1>
@@ -151,7 +153,6 @@ function AddEmployee() {
                 max="2025-01-01"
                 onBlur={(e) => validateField(id, e.target.value)}
                 className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-                {...(id === "dob" && { max: new Date().toISOString().split("T")[0] })}
               />
               {errors[id] && <p className="text-red-500 text-sm">{errors[id]}</p>}
             </div>

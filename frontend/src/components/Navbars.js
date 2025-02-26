@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Navbars = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -14,6 +15,7 @@ const Navbars = () => {
     
     return (
         <nav className="bg-white  sticky w-full z-10 top-0 start-0 border-b border-gray-200 ">
+             <ToastContainer position="top-right" autoClose={3000} />
             <div className=" flex flex-wrap items-center justify-between mx-auto p-4">
                 {/* Logo */}
                 <Link to="/" className="flex items-center space-x-3">
@@ -24,7 +26,7 @@ const Navbars = () => {
                     />
                     <span className="self-center  font-semibold whitespace-nowrap ">
                       
-                        {token ? `Welcome, ${first_name} ${last_name} !` : "Please Sign in..."}
+                        {token  ? `Welcome, ${first_name} ${last_name} !` : "Please Sign in..."}
                     </span>
                 </Link>
 
@@ -54,10 +56,13 @@ const Navbars = () => {
                         className="text-white bg-red-500 hover:bg-red-600 focus:ring-4 focus:outline-none focus:ring-red-300 font-medium rounded-lg text-sm px-4 py-2 text-center dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-800"
                         onClick={() => {
                             localStorage.removeItem("token");
-                            window.location.href = "/signIn";
+                            toast.success("Logged out successfully!");
+                            setTimeout(() => {
+                                window.location.href = "/signIn";
+                            }, 2000);
                         }}
                     >
-                        Log Out
+                        Log Out 
                     </button>}
 
                     {/* Mobile Menu Button */}
