@@ -57,7 +57,7 @@ function EmployeeList() {
     fetchEmployees();
   }, []);
 
-  const handleDelete = async (employee_code) => {
+  const handleDelete = async (employee_id) => {
     if (!window.confirm("Are you sure you want to delete this employee?")) return;
   
     const token = localStorage.getItem("token");
@@ -68,7 +68,7 @@ function EmployeeList() {
     }
   
     try {
-      const response = await fetch(`${baseurl}/deleteEmployee/${employee_code}`, {
+      const response = await fetch(`${baseurl}/deleteEmployee/${employee_id}`, {
         method: "DELETE",
         headers: {
           "Authorization": `Bearer ${token}`, // Attach token
@@ -98,19 +98,19 @@ function EmployeeList() {
     switch (searchCategory) {
       case "All":
         return (
-          `${employee.first_name} ${employee.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          `${employee.name} `.toLowerCase().includes(searchTerm.toLowerCase()) ||
           employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          employee.employee_code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          employee.job_role.toLowerCase().includes(searchTerm.toLowerCase())
+          employee.employee_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          employee.job_role_id.toLowerCase().includes(searchTerm.toLowerCase())
         );
       case "name":
-        return `${employee.first_name} ${employee.last_name}`.toLowerCase().includes(searchTerm.toLowerCase());
+        return `${employee.name} `.toLowerCase().includes(searchTerm.toLowerCase());
       case "email":
         return employee.email.toLowerCase().includes(searchTerm.toLowerCase());
-      case "employee_code":
-        return employee.employee_code.toLowerCase().includes(searchTerm.toLowerCase());
-      case "job_role":
-        return employee.job_role.toLowerCase().includes(searchTerm.toLowerCase());
+      case "employee_id":
+        return employee.employee_id.toLowerCase().includes(searchTerm.toLowerCase());
+      case "job_role_id":
+        return employee.job_role_id.toLowerCase().includes(searchTerm.toLowerCase());
       default:
         return true;
     }
@@ -128,7 +128,7 @@ function EmployeeList() {
     doc.autoTable({
       head: [["S.NO","Name", "Email", "DOB", "Phone", "Code", "Department", "Job Role", "Status"]],
       body: employees.map((emp,index) => [
-        index+1,`${emp.first_name} ${emp.last_name}`, emp.email, emp.dob, emp.phone_number, emp.employee_code, emp.department, emp.job_role, emp.status
+        index+1,`${emp.name} ${emp.last_name}`, emp.email, emp.date_of_birth, emp.phone_number, emp.employee_id, emp.department_id, emp.job_role_id, emp.status
       ])
     });
     doc.save("Employee_List.pdf");
@@ -190,8 +190,8 @@ function EmployeeList() {
     <option  value="All">All Categories</option>
     <option  value="name">Name</option>
     <option  value="email">Email</option>
-    <option  value="employee_code">Employee Code</option>
-    <option  value="job_role">Job Role</option>
+    <option  value="employee_id">Employee Code</option>
+    <option  value="job_role_id">Job Role</option>
   </select>
 
   {/* Search Input */}
@@ -207,7 +207,7 @@ function EmployeeList() {
   <Link
   to="/addUsers"
   className={`bg-blue-500 md:w-2/6 w-full lg:w-1/6 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md transition-all ${
-    job_role === "Admin" || job_role === "Manager" ? "" : "hidden"
+    job_role === "Admin"  ? "" : "hidden"
   }`}
 >
   + Add Employee
@@ -232,7 +232,7 @@ function EmployeeList() {
         <th className="px-4 py-3">Department</th>
         <th className="px-4 py-3">Job Role</th>
         <th className="px-4 py-3">Status</th>
-        {job_role === "Admin" || job_role === "Manager" ? <th className="px-4 py-3">Actions</th> : null}
+        {job_role === "Admin"  ? <th className="px-4 py-3">Actions</th> : null}
       
       </tr>
     </thead>
@@ -241,18 +241,18 @@ function EmployeeList() {
     <tbody>
       {currentEmployees.map((employee, index) => (
         <tr
-          key={employee.employee_code}
+          key={employee.employee_id}
           className="bg-white border-b text-gray-900 hover:bg-gray-100 even:bg-gray-50"
         >
           <td className="px-4 py-4 whitespace-nowrap">
-            {employee.first_name} {employee.last_name}
+            {employee.name} 
           </td>
           <td className="px-4 py-4">{employee.email}</td>
-          <td className="px-4 py-4">{employee.dob}</td>
+          <td className="px-4 py-4">{employee.date_of_birth}</td>
           <td className="px-4 py-4">{employee.phone_number}</td>
-          <td className="px-4 py-4">{employee.employee_code}</td>
-          <td className="px-4 py-4">{employee.department}</td>
-          <td className="px-4 py-4">{employee.job_role}</td>
+          <td className="px-4 py-4">{employee.employee_id}</td>
+          <td className="px-4 py-4">{employee.department_id}</td>
+          <td className="px-4 py-4">{employee.job_role_id}</td>
           <td className="px-4 py-4">
             <span
               className={`inline-block w-2 h-2 mr-2 rounded-full ${
@@ -261,16 +261,16 @@ function EmployeeList() {
             ></span>
             {employee.status}
           </td>
-          {job_role === "Admin" || job_role === "Manager" ?
+          {job_role === "Admin"  ?
           <td className="px-4 py-4 flex space-x-2">
             <Link
-              to={`/UpdateUsers/${employee.employee_code}`}
+              to={`/UpdateUsers/${employee.employee_id}`}
               className="text-blue-600 hover:underline" title="Edit Employee"
             >
              <svg className="h-6 w-6 text-gray-900"  viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">  <path stroke="none" d="M0 0h24v24H0z"/>  <path d="M9 7 h-3a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-3" />  <path d="M9 15h3l8.5 -8.5a1.5 1.5 0 0 0 -3 -3l-8.5 8.5v3" />  <line x1="16" y1="5" x2="19" y2="8" /></svg>
             </Link>
             <button
-              onClick={() => handleDelete(employee.employee_code)}
+              onClick={() => handleDelete(employee.employee_id)}
               className="text-red-600 hover:underline " title="Delete Employee" 
             >
             <svg className="h-6 w-6 text-red-500"  width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">  <path stroke="none" d="M0 0h24v24H0z"/>  <line x1="4" y1="7" x2="20" y2="7" />  <line x1="10" y1="11" x2="10" y2="17" />  <line x1="14" y1="11" x2="14" y2="17" />  <path d="M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2 -2l1 -12" />  <path d="M9 7v-3a1 1 0 0 1 1 -1h4a1 1 0 0 1 1 1v3" /></svg>
