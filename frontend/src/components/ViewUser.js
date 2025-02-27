@@ -101,7 +101,7 @@ function EmployeeList() {
           `${employee.name} `.toLowerCase().includes(searchTerm.toLowerCase()) ||
           employee.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
           employee.employee_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          employee.job_role_id.toLowerCase().includes(searchTerm.toLowerCase())
+          employee.job_role_name.toLowerCase().includes(searchTerm.toLowerCase())
         );
       case "name":
         return `${employee.name} `.toLowerCase().includes(searchTerm.toLowerCase());
@@ -109,8 +109,8 @@ function EmployeeList() {
         return employee.email.toLowerCase().includes(searchTerm.toLowerCase());
       case "employee_id":
         return employee.employee_id.toLowerCase().includes(searchTerm.toLowerCase());
-      case "job_role_id":
-        return employee.job_role_id.toLowerCase().includes(searchTerm.toLowerCase());
+      case "job_role_name":
+        return employee.job_role_name.toLowerCase().includes(searchTerm.toLowerCase());
       default:
         return true;
     }
@@ -128,7 +128,7 @@ function EmployeeList() {
     doc.autoTable({
       head: [["S.NO","Name", "Email", "DOB", "Phone", "Code", "Department", "Job Role", "Status"]],
       body: employees.map((emp,index) => [
-        index+1,`${emp.name} ${emp.last_name}`, emp.email, emp.date_of_birth, emp.phone_number, emp.employee_id, emp.department_id, emp.job_role_id, emp.status
+        index+1,`${emp.name} ${emp.last_name}`, emp.email, emp.date_of_birth, emp.phone_number, emp.employee_id, emp.department_name, emp.job_role_name, emp.status
       ])
     });
     doc.save("Employee_List.pdf");
@@ -190,8 +190,8 @@ function EmployeeList() {
     <option  value="All">All Categories</option>
     <option  value="name">Name</option>
     <option  value="email">Email</option>
-    <option  value="employee_id">Employee Code</option>
-    <option  value="job_role_id">Job Role</option>
+    <option  value="employee_id">Employee ID</option>
+    <option  value="job_role_name">Job Role</option>
   </select>
 
   {/* Search Input */}
@@ -251,8 +251,8 @@ function EmployeeList() {
           <td className="px-4 py-4">{employee.date_of_birth}</td>
           <td className="px-4 py-4">{employee.phone_number}</td>
           <td className="px-4 py-4">{employee.employee_id}</td>
-          <td className="px-4 py-4">{employee.department_id}</td>
-          <td className="px-4 py-4">{employee.job_role_id}</td>
+          <td className="px-4 py-4">{employee.department_name}</td>
+          <td className="px-4 py-4">{employee.job_role_name}</td>
           <td className="px-4 py-4">
             <span
               className={`inline-block w-2 h-2 mr-2 rounded-full ${

@@ -7,37 +7,81 @@ import "react-toastify/dist/ReactToastify.css";
 
 function AddEmployee() {
   const [formData, setFormData] = useState({
-    first_name: "",
-    last_name: "",
+    name: "",
     email: "",
     phone_number: "",
-    department: "",
-    job_role: "",
+    department_id: "",
+    job_role_id: "",
     hire_date: "",
     status: "Active",
-    dob: "",
+    date_of_birth: "",
   });
 
+  const [departments, setDepartments] = useState([]);
+  const [jobRoles, setJobRoles] = useState([]);
+  const [errors, setErrors] = useState({});
   const token = localStorage.getItem("token");
   const job_role = localStorage.getItem("job_role");
-  const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
-  // Restrict access to Admin and Manager
+  // Redirect non-admin users
   useEffect(() => {
-    if (job_role !== "Admin" && job_role !== "Manager") {
+    if (job_role !== "Admin") {
       toast.error("You do not have access to add employees!");
       navigate("/view_Employees");
     }
   }, [job_role, navigate]);
 
-  // Handle input change
+  // Fetch Departments
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const response = await fetch(`${baseurl}/getDepartments`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json();
+        if (response.ok) setDepartments(data);
+        else throw new Error(data.error || "Failed to load departments");
+      } catch (error) {
+        toast.error(error.message);
+      }
+    };
+
+    fetchDepartments();
+  }, [token]);
+
+  // Fetch Job Roles dynamically based on department selection
+  useEffect(() => {
+    if (!formData.department_id) {
+      setJobRoles([]);
+      return;
+    }
+
+    const fetchJobRoles = async () => {
+      try {
+        const response = await fetch(`${baseurl}/getJobRoles?department_id=${formData.department_id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await response.json();
+        if (response.ok) setJobRoles(data);
+        else throw new Error(data.error || "Failed to load job roles");
+      } catch (error) {
+        toast.error(error.message);
+      }
+    };
+
+    fetchJobRoles();
+  }, [formData.department_id, token]);
+
   const handleChange = (e) => {
     const { id, value } = e.target;
-    setFormData({ ...formData, [id]: value });
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+    validateField(id, value);
   };
 
-  // Validate individual fields onBlur
   const validateField = (id, value) => {
     let errorMsg = "";
     const nameRegex = /^[A-Za-z\s]+$/;
@@ -45,9 +89,8 @@ function AddEmployee() {
     const phoneRegex = /^\+?[0-9]{10}$/;
 
     switch (id) {
-      case "first_name":
-      case "last_name":
-        if (!value.match(nameRegex)) errorMsg = "Must contain only letters";
+      case "name":
+        if (!value.match(nameRegex)) errorMsg = "Name must contain only letters";
         break;
       case "email":
         if (!value.match(emailRegex)) errorMsg = "Invalid email format";
@@ -55,10 +98,14 @@ function AddEmployee() {
       case "phone_number":
         if (!value.match(phoneRegex)) errorMsg = "Invalid phone number";
         break;
-      case "department":
-      case "job_role":
+      case "department_id":
+        if (!value) errorMsg = "Please select a department";
+        break;
+      case "job_role_id":
+        if (!value) errorMsg = "Please select a job role";
+        break;
       case "hire_date":
-      case "dob":
+      case "date_of_birth":
         if (!value) errorMsg = "This field is required";
         break;
       default:
@@ -68,19 +115,25 @@ function AddEmployee() {
     setErrors((prevErrors) => ({ ...prevErrors, [id]: errorMsg }));
   };
 
-  // Validate form before submission
   const validateForm = () => {
     let newErrors = {};
     Object.keys(formData).forEach((key) => {
       validateField(key, formData[key]);
+      if (!formData[key]) {
+        newErrors[key] = "This field is required";
+      }
     });
+
+    setErrors(newErrors);
     return Object.values(newErrors).every((error) => !error);
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      toast.error("Please fill all fields correctly");
+      return;
+    }
 
     try {
       const response = await fetch(`${baseurl}/addEmployee`, {
@@ -95,22 +148,8 @@ function AddEmployee() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Error adding employee");
 
-    
-      setFormData({
-        first_name: "",
-        last_name: "",
-        email: "",
-        phone_number: "",
-        department: "",
-        job_role: "",
-        hire_date: "",
-        status: "Active",
-        dob: "",
-      });
       toast.success("Employee added successfully!");
-      setTimeout(() => {
-        navigate("/view_Employees");
-      }, 1000);
+      setTimeout(() => navigate("/view_Employees"), 1000);
     } catch (error) {
       toast.error(error.message);
     }
@@ -119,87 +158,50 @@ function AddEmployee() {
   return (
     <div className="min-h-screen flex flex-col items-center bg-gray-100 p-6">
       <ToastContainer />
-
-      {/* Header Section */}
       <div className="w-full max-w-3xl flex justify-between items-center bg-blue-500 text-white p-4 rounded-lg shadow-md">
         <h1 className="text-lg font-bold">Add Employee</h1>
-        <Link
-          to="/view_Employees"
-          className="bg-white text-blue-500 px-4 py-2 rounded-md hover:bg-gray-200 transition"
-        >
+        <Link to="/view_Employees" className="bg-white text-blue-500 px-4 py-2 rounded-md hover:bg-gray-200 transition">
           View Employees
         </Link>
       </div>
 
-      {/* Form Section */}
       <div className="w-full max-w-3xl bg-white mt-6 p-6 rounded-lg shadow-md">
         <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {[
-            { label: "First Name", id: "first_name", type: "text" },
-            { label: "Last Name", id: "last_name", type: "text" },
+            { label: "Name", id: "name", type: "text" },
             { label: "Email", id: "email", type: "email" },
-            { label: "Phone Number", id: "phone_number", type: "number" },
-            { label: "Department", id: "department", type: "text" },
+            { label: "Phone Number", id: "phone_number", type: "text" },
             { label: "Hire Date", id: "hire_date", type: "date" },
-            { label: "Date of Birth", id: "dob", type: "date" },
+            { label: "Date of Birth", id: "date_of_birth", type: "date" },
           ].map(({ label, id, type }) => (
             <div key={id}>
               <label className="block text-gray-700">{label}</label>
-              <input
-                type={type}
-                id={id}
-                value={formData[id]}
-                onChange={handleChange}
-                max="2025-01-01"
-                onBlur={(e) => validateField(id, e.target.value)}
-                className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
+              <input type={type} id={id} value={formData[id]} onChange={handleChange} className="w-full p-2 border rounded-md" />
               {errors[id] && <p className="text-red-500 text-sm">{errors[id]}</p>}
             </div>
           ))}
 
-          {/* Job Role Dropdown */}
+          <div>
+            <label className="block text-gray-700">Department</label>
+            <select id="department_id" value={formData.department_id} onChange={handleChange} className="w-full p-2 border rounded-md">
+              <option value="">Select Department</option>
+              {departments.map((dept) => (
+                <option key={dept.department_id} value={dept.department_id}>{dept.department_name}</option>
+              ))}
+            </select>
+          </div>
+
           <div>
             <label className="block text-gray-700">Job Role</label>
-            <select
-              id="job_role"
-              value={formData.job_role}
-              onChange={handleChange}
-              onBlur={(e) => validateField("job_role", e.target.value)}
-              className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-            >
+            <select id="job_role_id" value={formData.job_role_id} onChange={handleChange} className="w-full p-2 border rounded-md">
               <option value="">Select Job Role</option>
-              <option value="Developer">Developer</option>
-              <option value="Manager">Manager</option>
-              <option value="HR">HR</option>
-            </select>
-            {errors.job_role && <p className="text-red-500 text-sm">{errors.job_role}</p>}
-          </div>
-
-          {/* Status Dropdown */}
-          <div>
-            <label className="block text-gray-700">Status</label>
-            <select
-              id="status"
-              value={formData.status}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
-            >
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-              <option value="On Leave">On Leave</option>
+              {jobRoles.map((role) => (
+                <option key={role.job_role_id} value={role.job_role_id}>{role.job_role_name}</option>
+              ))}
             </select>
           </div>
 
-          {/* Submit Button */}
-          <div className="sm:col-span-2 flex justify-end">
-            <button
-              type="submit"
-              className="w-full sm:w-auto bg-blue-500 text-white px-6 py-2 rounded-md hover:bg-blue-600 transition"
-            >
-              Add Employee
-            </button>
-          </div>
+          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Add Employee</button>
         </form>
       </div>
     </div>

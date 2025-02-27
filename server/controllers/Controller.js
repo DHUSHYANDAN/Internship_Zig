@@ -4,30 +4,93 @@ const db = require('../models/Employee'); // MySQL Connection
 // Get Employee Details (GET Method)
 const index = async (req, res) => {
     try {
-        const [employees] = await db.query("SELECT * FROM employees");
+        const [employees] = await db.query(`
+            SELECT 
+                e.employee_id, 
+                e.name, 
+                e.email, 
+                e.phone_number, 
+                DATE_FORMAT(e.date_of_birth, '%d-%m-%Y') AS date_of_birth,
+                DATE_FORMAT(e.hire_date, '%d-%m-%Y') AS hire_date,
+                e.status, 
+                d.department_name, 
+                j.job_role_name
+            FROM employees e
+            JOIN departments d ON e.department_id = d.department_id
+            JOIN job_roles j ON e.job_role_id = j.job_role_id
+        `);
 
-        // Format date fields
-        const formattedEmployees = employees.map(employee => ({
-            ...employee,
-            date_of_birth: moment(employee.date_of_birth).format('DD-MM-YYYY'),
-            hire_date: moment(employee.hire_date).format('DD-MM-YYYY')
-        }));
-
-        res.json(formattedEmployees);
+        res.json(employees);
     } catch (err) {
         console.error('Error in listing employees', err);
         res.status(500).json({ error: 'Error in listing employees' });
     }
 };
 
+
+const getDepartments = async (req, res) => {
+    try {
+        const [departments] = await db.query("SELECT * FROM departments");
+        res.json(departments);
+    } catch (err) {
+        console.error('Error in listing departments', err);
+        res.status(500).json({ error: 'Error in listing departments' });
+    }
+};
+
+// Ensure you import your database connection
+
+const getJobRoles = async (req, res) => {
+    try {
+        const { department_id } = req.query; // Expecting department_id from frontend
+
+        if (!department_id) {
+            return res.status(400).json({ error: "Department ID is required" });
+        }
+
+        const sql = `
+            SELECT job_role_id, job_role_name 
+            FROM job_roles 
+            WHERE department_id = ?
+        `;
+
+        const [rows] = await db.execute(sql, [department_id]);
+
+        res.json(rows); // Send back the job roles
+    } catch (error) {
+        console.error("Error fetching job roles:", error);
+        res.status(500).json({ error: "Server error" });
+    }
+};
+
+
 // Create Employee (POST Method)
 const detailspost = async (req, res) => {
-    const { employee_id, name, email, phone_number, department_id, job_role_id, date_of_birth, hire_date, status } = req.body;
+    const { name, email, phone_number, department_id, job_role_id, date_of_birth, hire_date, status } = req.body;
 
     try {
+        // Extract current year
+        const currentYear = new Date().getFullYear();
+
+        // Fetch the last employee ID for the current year
+        const [lastEmployee] = await db.query(
+            "SELECT employee_id FROM employees WHERE employee_id LIKE ? ORDER BY employee_id DESC LIMIT 1",
+            [`EMP${currentYear}%`]
+        );
+
+        // Generate new employee ID
+        let newSequence = 1; // Default if no employees exist for the year
+        if (lastEmployee.length > 0) {
+            const lastId = lastEmployee[0].employee_id; // e.g., "EMP2025005"
+            const lastSequence = parseInt(lastId.substring(7)); // Extract last sequence (e.g., "005" → 5)
+            newSequence = lastSequence + 1; // Increment
+        }
+
+        // Format new employee ID (e.g., EMP2025001)
+        const employee_id = `EMP${currentYear}${String(newSequence).padStart(3, '0')}`;
+
         // Check for duplicate email
         const [existingEmployee] = await db.query("SELECT email FROM employees WHERE email = ?", [email]);
-
         if (existingEmployee.length > 0) {
             return res.status(400).json({ error: 'Duplicate email. Please use a different email.' });
         }
@@ -45,6 +108,8 @@ const detailspost = async (req, res) => {
         res.status(500).json({ error: 'Error saving employee' });
     }
 };
+
+
 
 // View Employee for Editing (GET Method)
 const detailsupdateget = async (req, res) => {
@@ -111,4 +176,4 @@ const detailsdelete = async (req, res) => {
     }
 };
 
-module.exports = { index, detailspost, detailsupdateget, detailsupdate, detailsdelete };
+module.exports = { index, detailspost, detailsupdateget, detailsupdate, detailsdelete ,getDepartments, getJobRoles};

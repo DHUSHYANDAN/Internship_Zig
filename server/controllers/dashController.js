@@ -82,6 +82,7 @@ const signin = async (req, res) => {
 
     } catch (err) {
         console.error("Error in signin:", err.message);
+        if(err.message=="failed to fetch"){}
         res.status(500).json({ error: "Internal server error. Please try again later." });
     }
 };
