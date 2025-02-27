@@ -9,7 +9,7 @@ const Navbars = () => {
     const token = localStorage.getItem("token");
     const job_role = localStorage.getItem("job_role");
     const first_name=localStorage.getItem("first_name");
-    const last_name=localStorage.getItem("last_name");
+   
 
 
     
@@ -26,7 +26,7 @@ const Navbars = () => {
                     />
                     <span className="self-center  font-semibold whitespace-nowrap ">
                       
-                        {token  ? `Welcome, ${first_name} ${last_name} !` : "Please Sign in..."}
+                        {token  ? `Welcome, ${first_name} !` : "Please Sign in..."}
                     </span>
                 </Link>
 

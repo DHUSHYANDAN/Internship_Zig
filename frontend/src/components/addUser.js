@@ -138,7 +138,7 @@ function AddEmployee() {
             { label: "First Name", id: "first_name", type: "text" },
             { label: "Last Name", id: "last_name", type: "text" },
             { label: "Email", id: "email", type: "email" },
-            { label: "Phone Number", id: "phone_number", type: "text" },
+            { label: "Phone Number", id: "phone_number", type: "number" },
             { label: "Department", id: "department", type: "text" },
             { label: "Hire Date", id: "hire_date", type: "date" },
             { label: "Date of Birth", id: "dob", type: "date" },

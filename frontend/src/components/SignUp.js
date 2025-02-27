@@ -6,11 +6,13 @@ import "react-toastify/dist/ReactToastify.css";
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
-    employeeId: "",
     password: "",
     confirmPassword: "",
+    role: "Employee", 
   });
+
   const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
@@ -26,8 +28,8 @@ const SignUp = () => {
         else if (!/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/.test(value))
           error = "Invalid email address";
         break;
-      case "employeeId":
-        if (!value) error = "Employee ID is required";
+      case "name":
+        if (!value) error = "Name is required";
         break;
       case "password":
         if (!value) error = "Password is required";
@@ -36,6 +38,9 @@ const SignUp = () => {
       case "confirmPassword":
         if (!value) error = "Please confirm your password";
         else if (value !== formData.password) error = "Passwords do not match";
+        break;
+      case "role":
+        if (!["Admin", "Employee"].includes(value)) error = "Invalid role selected";
         break;
       default:
         break;
@@ -62,17 +67,14 @@ const SignUp = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-    
+
     try {
       const response = await fetch(`${baseurl}/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: formData.email,
-          employee_code: formData.employeeId,
-          password: formData.password,
-        }),
+        body: JSON.stringify(formData),
       });
+
       const data = await response.json();
 
       if (response.ok) {
@@ -93,6 +95,21 @@ const SignUp = () => {
         <h1 className="text-xl font-bold text-gray-900 mb-4">Create an Account</h1>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
+            <label htmlFor="name" className="block mb-2 text-sm font-medium text-gray-900">Name</label>
+            <input
+              type="text"
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg block w-full p-2.5"
+              placeholder="Enter the Name"
+            />
+            {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+          </div>
+
+          <div>
             <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900">Email</label>
             <input
               type="email"
@@ -106,20 +123,7 @@ const SignUp = () => {
             />
             {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
           </div>
-          <div>
-            <label htmlFor="employeeId" className="block mb-2 text-sm font-medium text-gray-900">Employee ID</label>
-            <input
-              type="text"
-              id="employeeId"
-              name="employeeId"
-              value={formData.employeeId}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg block w-full p-2.5"
-              placeholder="Enter the Employee Id"
-            />
-            {errors.employeeId && <p className="text-red-500 text-sm">{errors.employeeId}</p>}
-          </div>
+
           <div>
             <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900">Password</label>
             <input
@@ -134,6 +138,7 @@ const SignUp = () => {
             />
             {errors.password && <p className="text-red-500 text-sm">{errors.password}</p>}
           </div>
+
           <div>
             <label htmlFor="confirmPassword" className="block mb-2 text-sm font-medium text-gray-900">Confirm Password</label>
             <input
@@ -148,6 +153,23 @@ const SignUp = () => {
             />
             {errors.confirmPassword && <p className="text-red-500 text-sm">{errors.confirmPassword}</p>}
           </div>
+
+          <div>
+            <label htmlFor="role" className="block mb-2 text-sm font-medium text-gray-900">Role</label>
+            <select
+              id="role"
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg block w-full p-2.5"
+            >
+              <option value="Admin">Admin</option>
+              <option value="Employee">User</option>
+            </select>
+            {errors.role && <p className="text-red-500 text-sm">{errors.role}</p>}
+          </div>
+
           <button type="submit" className="w-full text-white bg-blue-600 hover:bg-blue-700 font-medium rounded-lg text-sm px-5 py-2.5">
             Create an Account
           </button>

@@ -34,27 +34,36 @@ const SignIn = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-
+  
     try {
       const response = await fetch(`${baseurl}/signin`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
       });
+  
       const data = await response.json();
+  
       if (!response.ok) {
-        throw new Error(data.message || 'Sign-in failed');
+        throw new Error(data.error || data.message || "Sign-in failed");
       }
-      toast.success('Login successful!');
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('job_role', data.job_role);
-      localStorage.setItem('last_name', data.last_name);
-      localStorage.setItem('first_name', data.first_name);
-      setTimeout(() => (window.location.href = '/dashboard'), 1000);
+  
+      // Store user details in localStorage
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("job_role", data.role);
+      localStorage.setItem("first_name", data.name);
+  
+      toast.success("Login successful!", { autoClose: 1000 });
+      setTimeout(() => (window.location.href = "/dashboard"), 1500);
     } catch (error) {
-      toast.error(error.message);
+      console.error("Sign-in error:", error.message);
+     toast.error("Network or server error. Please try again.");
     }
   };
+  
 
   return (
     <section className="flex flex-col items-center justify-center min-h-screen pt-6">

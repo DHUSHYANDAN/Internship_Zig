@@ -1,51 +1,44 @@
 const moment = require('moment');
-const Employee = require('../models/Users'); 
+const db = require('../models/Employee'); // MySQL Connection
 
-// Get Employee Details (Get Method)
+// Get Employee Details (GET Method)
 const index = async (req, res) => {
     try {
-        const employees = await Employee.find({});
+        const [employees] = await db.query("SELECT * FROM employees");
 
+        // Format date fields
         const formattedEmployees = employees.map(employee => ({
-            ...employee.toObject(),
-            dob: moment(employee.dob).format('DD-MM-YYYY'),
+            ...employee,
+            date_of_birth: moment(employee.date_of_birth).format('DD-MM-YYYY'),
             hire_date: moment(employee.hire_date).format('DD-MM-YYYY')
         }));
 
         res.json(formattedEmployees);
     } catch (err) {
         console.error('Error in listing employees', err);
-        res.status(500).send('Error in listing employees');
+        res.status(500).json({ error: 'Error in listing employees' });
     }
 };
 
 // Create Employee (POST Method)
 const detailspost = async (req, res) => {
-    const { first_name, last_name, email, phone_number, department, job_role, dob, hire_date, status } = req.body;
+    const { employee_id, name, email, phone_number, department_id, job_role_id, date_of_birth, hire_date, status } = req.body;
 
     try {
         // Check for duplicate email
-        const existingEmployeeEmail = await Employee.findOne({ email });
-        if (existingEmployeeEmail) {
+        const [existingEmployee] = await db.query("SELECT email FROM employees WHERE email = ?", [email]);
+
+        if (existingEmployee.length > 0) {
             return res.status(400).json({ error: 'Duplicate email. Please use a different email.' });
         }
 
-        // Create new employee
-        const newEmployee = new Employee({
-            first_name,
-            last_name,
-            email,
-            phone_number,
-            department,
-            job_role,
-            dob: new Date(dob),
-            hire_date: new Date(hire_date),
-            status
-        });
+        // Insert new employee
+        await db.query(
+            "INSERT INTO employees (employee_id, name, email, phone_number, department_id, job_role_id, date_of_birth, hire_date, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [employee_id, name, email, phone_number, department_id, job_role_id, date_of_birth, hire_date, status]
+        );
 
-        await newEmployee.save();
-
-        res.status(200).json({ message: 'Employee created successfully', employee_code: newEmployee.employee_code });
+        res.status(200).json({ message: 'Employee created successfully', employee_id });
 
     } catch (err) {
         console.error('Error saving employee', err);
@@ -53,22 +46,21 @@ const detailspost = async (req, res) => {
     }
 };
 
-
 // View Employee for Editing (GET Method)
 const detailsupdateget = async (req, res) => {
-    let employee_code = req.params.employee_code;
+    let employee_id = req.params.employee_id;
 
     try {
-        const employee = await Employee.findOne({ employee_code });
+        const [employee] = await db.query("SELECT * FROM employees WHERE employee_id = ?", [employee_id]);
 
-        if (!employee) {
+        if (employee.length === 0) {
             return res.status(404).json({ error: 'Employee not found' });
         }
 
         const formattedEmployee = {
-            ...employee.toObject(),
-            dob: moment(employee.dob).format('YYYY-MM-DD'),
-            hire_date: moment(employee.hire_date).format('YYYY-MM-DD')
+            ...employee[0],
+            date_of_birth: moment(employee[0].date_of_birth).format('YYYY-MM-DD'),
+            hire_date: moment(employee[0].hire_date).format('YYYY-MM-DD')
         };
 
         res.json(formattedEmployee);
@@ -80,53 +72,41 @@ const detailsupdateget = async (req, res) => {
 
 // Update Employee Details (PUT Method)
 const detailsupdate = async (req, res) => {
-    const { first_name, last_name, employee_code, email, phone_number, department, job_role, dob, hire_date, status } = req.body;
+    const { employee_id, name, email, phone_number, department_id, job_role_id, date_of_birth, hire_date, status } = req.body;
 
     try {
-        const updatedEmployee = await Employee.findOneAndUpdate(
-            { employee_code },
-            {
-                first_name,
-                last_name,
-                employee_code,
-                email,
-                phone_number,
-                department,
-                job_role,
-                dob: new Date(dob),
-                hire_date: new Date(hire_date),
-                status
-            },
-            { new: true, runValidators: true }
+        const [result] = await db.query(
+            "UPDATE employees SET name = ?, email = ?, phone_number = ?, department_id = ?, job_role_id = ?, date_of_birth = ?, hire_date = ?, status = ? WHERE employee_id = ?",
+            [name, email, phone_number, department_id, job_role_id, date_of_birth, hire_date, status, employee_id]
         );
 
-        if (!updatedEmployee) {
-            return res.status(404).json({ error: 'No employee found with the provided employee code.' });
-        } else {
-            res.status(200).json({ message: 'Employee updated successfully' });
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'No employee found with the provided employee ID.' });
         }
 
+        res.status(200).json({ message: 'Employee updated successfully' });
+
     } catch (err) {
-        console.log('Error in updating employee data', err);
+        console.error('Error in updating employee data', err);
         res.status(500).json({ error: 'Error in updating employee data' });
     }
 };
- 
+
 // Delete Employee (DELETE Method)
 const detailsdelete = async (req, res) => {
-    const { employee_code } = req.params;                                                                                                                                                                           
+    const { employee_id } = req.params;
 
     try {
-        const result = await Employee.findOneAndDelete({ employee_code });
+        const [result] = await db.query("DELETE FROM employees WHERE employee_id = ?", [employee_id]);
 
-        if (!result) {
-            return res.status(404).json({ error: 'No employee found with the provided employee code.' });
-        } else {                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
-            res.status(200).json({ message: 'Employee deleted successfully' });
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'No employee found with the provided employee ID.' });
         }
 
+        res.status(200).json({ message: 'Employee deleted successfully' });
+
     } catch (err) {
-        console.log('Error in deleting employee data', err);
+        console.error('Error in deleting employee data', err);
         res.status(500).json({ error: 'Error in deleting employee data' });
     }
 };

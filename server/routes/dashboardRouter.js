@@ -1,15 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const authenticateToken = require('../Middleware/LoginMiddleware');
-const authorizeAdminOrManager = require('../Middleware/AuthorizedAdorMag');
-const { signup, signin,approveUser,getUnapprovedUsers } = require('../controllers/dashController');
-
+const authorizeAdmin = require('../Middleware/AuthorizationAdmin');
+const { signup, signin, getUnapprovedUsers, approveUser, rejectUser } = require('../controllers/dashController');
 
 router.post('/signup', signup);
 router.post('/signin', signin);
-router.get('/approve-user', approveUser);
 
-router.get('/get-unapproved-users', authenticateToken,authorizeAdminOrManager, getUnapprovedUsers);
-
+// Admin routes to manage user requests
+router.get('/get-unapproved-users', authenticateToken, authorizeAdmin, getUnapprovedUsers);
+router.post('/approve-user/:user_id', authenticateToken, authorizeAdmin, approveUser);
+router.post('/reject-user/:user_id', authenticateToken, authorizeAdmin, rejectUser);
 
 module.exports = router;
