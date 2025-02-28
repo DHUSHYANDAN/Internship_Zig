@@ -41,7 +41,7 @@ function AddEmployee() {
         });
         const data = await response.json();
         if (response.ok) setDepartments(data);
-        else throw new Error(data.error || "Failed to load departments");
+        else throw new Error(data.error || "No departments available" );
       } catch (error) {
         toast.error(error.message);
       }
@@ -137,22 +137,28 @@ function AddEmployee() {
 
     try {
       const response = await fetch(`${baseurl}/addEmployee`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(formData),
       });
-
+  
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Error adding employee");
-
+      
+      if (!response.ok) {
+          throw new Error(data.error || "Unable to add employee. Please try again.");
+      }
+  
       toast.success("Employee added successfully!");
       setTimeout(() => navigate("/view_Employees"), 1000);
-    } catch (error) {
-      toast.error(error.message);
-    }
+  
+  } catch (error) {
+      console.error("Error:", error); // Log for debugging
+      toast.error(error.message || "Something went wrong. Please try again.");
+  }
+  
   };
 
   return (
@@ -170,13 +176,14 @@ function AddEmployee() {
           {[
             { label: "Name", id: "name", type: "text" },
             { label: "Email", id: "email", type: "email" },
-            { label: "Phone Number", id: "phone_number", type: "text" },
+            { label: "Phone Number", id: "phone_number", type: "number" },
             { label: "Hire Date", id: "hire_date", type: "date" },
             { label: "Date of Birth", id: "date_of_birth", type: "date" },
           ].map(({ label, id, type }) => (
             <div key={id}>
               <label className="block text-gray-700">{label}</label>
-              <input type={type} id={id} value={formData[id]} onChange={handleChange} className="w-full p-2 border rounded-md" />
+              <input type={type} id={id} value={formData[id]} onChange={handleChange} 
+              max="2025-01-01" className="w-full p-2 border rounded-md" />
               {errors[id] && <p className="text-red-500 text-sm">{errors[id]}</p>}
             </div>
           ))}
@@ -189,6 +196,7 @@ function AddEmployee() {
                 <option key={dept.department_id} value={dept.department_id}>{dept.department_name}</option>
               ))}
             </select>
+            {errors["department_id"] && <p className="text-red-500 text-sm">{errors["department_id"]}</p>}
           </div>
 
           <div>
@@ -199,9 +207,22 @@ function AddEmployee() {
                 <option key={role.job_role_id} value={role.job_role_id}>{role.job_role_name}</option>
               ))}
             </select>
+            {errors["job_role_id"] && <p className="text-red-500 text-sm">{errors["job_role_id"]}</p>}
+          </div>
+          <div>
+          <label className="block text-gray-700">Status</label>
+          <select id="status" value={formData.status} onChange={handleChange} className="w-full p-2 border rounded-md">
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+            <option value="On Leave">On Leave</option>
+            
+          </select>
+          {errors["status"] && <p className="text-red-500 text-sm">{errors["status"]}</p>}
           </div>
 
-          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Add Employee</button>
+          <div className="col-span-1 sm:col-span-2 flex justify-center">
+            <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Add Employee</button>
+          </div>
         </form>
       </div>
     </div>

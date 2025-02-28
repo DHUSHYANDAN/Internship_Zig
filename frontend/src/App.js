@@ -10,6 +10,7 @@ import SignUp from "./pages/SignupPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Requestedempl from "./pages/Requested_empl";
 import ErrorPage from "./components/er404Page";
+import ManageDept from "./pages/ManageDept";
 import "./App.css";
 
 function App() {
@@ -30,6 +31,8 @@ function App() {
         <Route path="/view_Employees" element={<ProtectedRoute element={<Viewuser />} />} />
         <Route path="/UpdateUsers/:employee_code" element={<ProtectedRoute element={<Edit />} />} />
         <Route path="/requested-Employees" element={<ProtectedRoute element={<Requestedempl />} />} />
+        <Route path="/manage-Departments" element={<ProtectedRoute element={<ManageDept />} />} />
+        
         
 
         {/* Fallback Route */}

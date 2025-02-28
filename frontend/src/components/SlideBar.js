@@ -40,7 +40,7 @@ const SlideBar = () => {
           </button>
 
           <h2 className="text-xl mt-2 font-bold text-blue-500 mb-6">
-            {job_role === "Admin" || job_role === "Manager"
+            {job_role === "Admin" 
               ? "Admin Dashboard"
               : "Employee Dashboard"}
           </h2>
@@ -69,7 +69,21 @@ const SlideBar = () => {
                 Manage Employees
               </NavLink>
             </li>
-            {job_role === "Admin" || job_role === "Manager" ? (
+            {job_role === "Admin"  ? (
+              <li>
+                <NavLink
+                  to="/manage-departments"
+                  className={({ isActive }) =>
+                    `block p-2 rounded-lg ${
+                      isActive ? "bg-blue-500 text-white" : "text-gray-900 hover:bg-gray-200"
+                    }`
+                  }
+                >
+                 Manage Departments
+                </NavLink>
+              </li>
+            ) : null}
+            {job_role === "Admin"  ? (
               <li>
                 <NavLink
                   to="/requested-Employees"

@@ -7,19 +7,20 @@ import "react-toastify/dist/ReactToastify.css";
 
 function EditEmployee() {
   const [formData, setFormData] = useState({
-    first_name: "",
-    last_name: "",
+    name: "",
     employee_code: "",
     email: "",
     phone_number: "",
-    department: "",
-    job_role: "",
+    department_id: "",
+    job_role_id: "",
     hire_date: "",
     status: "",
-    dob: "",
+    date_of_birth: "",
   });
 
   const [errors, setErrors] = useState({});
+    const [departments, setDepartments] = useState([]);
+    const [jobRoles, setJobRoles] = useState([]);
   const { employee_code } = useParams();
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -59,6 +60,47 @@ function EditEmployee() {
     }
   }, [employee_code, token, navigate]);
 
+    // Fetch Departments
+    useEffect(() => {
+      const fetchDepartments = async () => {
+        try {
+          const response = await fetch(`${baseurl}/getDepartments`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const data = await response.json();
+          if (response.ok) setDepartments(data);
+          else throw new Error(data.error || "No departments available");
+        } catch (error) {
+          toast.error(error.message);
+        }
+      };
+  
+      fetchDepartments();
+    }, [token]);
+
+
+      // Fetch Job Roles dynamically based on department selection
+      useEffect(() => {
+        if (!formData.department_id) {
+          setJobRoles([]);
+          return;
+        }
+         const fetchJobRoles = async () => {
+              try {
+                const response = await fetch(`${baseurl}/getJobRoles?department_id=${formData.department_id}`, {
+                  headers: { Authorization: `Bearer ${token}` },
+                });
+                const data = await response.json();
+                if (response.ok) setJobRoles(data);
+                else throw new Error(data.error || "Failed to load job roles");
+              } catch (error) {
+                toast.error(error.message);
+              }
+            };
+        
+            fetchJobRoles();
+          }, [formData.department_id, token]);
+
   const handleChange = (e) => {
     const { id, value } = e.target;
     setFormData({ ...formData, [id]: value });
@@ -69,17 +111,17 @@ function EditEmployee() {
     const nameRegex = /^[A-Za-z\s]+$/;
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
     const phoneRegex = /^\+?[0-9]{10}$/;
-    const employeeCodeRegex = /^[A-Za-z0-9-]+$/;
+    
 
-    if (!formData.first_name.match(nameRegex)) newErrors.first_name = "First name must only contain letters";
-    if (!formData.last_name.match(nameRegex)) newErrors.last_name = "Last name must only contain letters";
+    if (!formData.name.match(nameRegex)) newErrors.first_name = " Name must only contain letters";
+   
     if (!formData.email.match(emailRegex)) newErrors.email = "Invalid email format";
     if (!formData.phone_number.match(phoneRegex)) newErrors.phone_number = "Invalid phone number";
-    if (!formData.employee_code.match(employeeCodeRegex)) newErrors.employee_code = "Invalid employee code";
-    if (!formData.department) newErrors.department = "Department is required";
-    if (!formData.job_role) newErrors.job_role = "Job role is required";
+    if (formData.employee_code==="") newErrors.employee_code = "Invalid employee code";
+    if (!formData.department_id) newErrors.department_id = "Department is required";
+    if (!formData.job_role_id) newErrors.job_role_id = "Job role is required";
     if (!formData.hire_date) newErrors.hire_date = "Hire date is required";
-    if (!formData.dob) newErrors.dob = "Date of birth is required";
+    if (!formData.date_of_birth) newErrors.date_of_birth = "Date of birth is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -91,7 +133,7 @@ function EditEmployee() {
 
     try {
       const response = await fetch(`${baseurl}/updateEmployee`, {
-        method: "POST",
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -128,14 +170,13 @@ function EditEmployee() {
       <div className="w-full max-w-3xl bg-white mt-6 p-6 rounded-lg shadow-md">
         <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {[
-            { label: "First Name", id: "first_name", type: "text" },
-            { label: "Last Name", id: "last_name", type: "text" },
-            { label: "Employee Code", id: "employee_code", type: "text", readOnly: true },
+            { label: "Name", id: "name", type: "text" },
+           
+            { label: "Employee Id", id: "employee_id", type: "text", readOnly: true },
             { label: "Email", id: "email", type: "email" },
-            { label: "Phone Number", id: "phone_number", type: "text" },
-            { label: "Department", id: "department", type: "text" },
+            { label: "Phone Number", id: "phone_number", type: "number" },
             { label: "Hire Date", id: "hire_date", type: "date" },
-            { label: "Date of Birth", id: "dob", type: "date" },
+            { label: "Date of Birth", id: "date_of_birth", type: "date" },
           ].map(({ label, id, type, readOnly }) => (
             <div key={id}>
               <label className="block text-gray-700">{label}</label>
@@ -151,17 +192,27 @@ function EditEmployee() {
               {errors[id] && <p className="text-red-500 text-sm">{errors[id]}</p>}
             </div>
           ))}
+          <div>
+            <label className="block text-gray-700">Department</label>
+            <select id="department_id" value={formData.department_id} onChange={handleChange} className="w-full p-2 border rounded-md">
+              <option value="">Select Department</option>
+              {departments.map((dept) => (
+                <option key={dept.department_id} value={dept.department_id}>{dept.department_name}</option>
+              ))}
+            </select>
+            {errors["department_id"] && <p className="text-red-500 text-sm">{errors["department_id"]}</p>}
+          </div>
 
           {/* Job Role */}
-          <div>
+         <div>
             <label className="block text-gray-700">Job Role</label>
-            <select id="job_role" value={formData.job_role} onChange={handleChange} required className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400">
+            <select id="job_role_id" value={formData.job_role_id} onChange={handleChange} className="w-full p-2 border rounded-md">
               <option value="">Select Job Role</option>
-              <option value="Developer">Developer</option>
-              <option value="Manager">Manager</option>
-              <option value="HR">HR</option>
+              {jobRoles.map((role) => (
+                <option key={role.job_role_id} value={role.job_role_id}>{role.job_role_name}</option>
+              ))}
             </select>
-            {errors.job_role && <p className="text-red-500 text-sm">{errors.job_role}</p>}
+            {errors["job_role_id"] && <p className="text-red-500 text-sm">{errors["job_role_id"]}</p>}
           </div>
 
           {/* Status */}

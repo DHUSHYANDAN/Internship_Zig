@@ -23,11 +23,11 @@ const AdminDashboard = () => {
           const overview = {
             totalEmployees: data.length,
             departments: data.reduce((acc, emp) => {
-              acc[emp.department] = (acc[emp.department] || 0) + 1;
+              acc[emp.department_name] = (acc[emp.department_name] || 0) + 1;
               return acc;
             }, {}),
             jobRoles: data.reduce((acc, emp) => {
-              acc[emp.job_role] = (acc[emp.job_role] || 0) + 1;
+              acc[emp.job_role_name] = (acc[emp.job_role_name] || 0) + 1;
               return acc;
             }, {}),
             status: [
@@ -91,27 +91,7 @@ const AdminDashboard = () => {
                 </ResponsiveContainer>
               </div>
             
-              {/* Employee Status Chart */}
-              <div className="bg-white p-6 shadow-lg rounded-lg">
-                <h2 className="text-lg font-semibold text-center mb-4">Employee Status</h2>
-                <ResponsiveContainer width="100%" height={200}>
-                  <PieChart>
-                    <Pie
-                      data={employeeOverview.status}
-                      cx="50%"
-                      cy="50%"
-                      labelLine={false}
-                      outerRadius={80}
-                      dataKey="value"
-                    >
-                      {employeeOverview.status.map((_, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
+          
               {/* job_role */}
               <div className="bg-white p-6 shadow-lg rounded-lg">
                 <h2 className="text-lg font-semibold text-center mb-4">Job Roles</h2>
@@ -126,6 +106,27 @@ const AdminDashboard = () => {
                       dataKey="value"
                     >
                       {Object.entries(employeeOverview.jobRoles).map(([_, value], index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+                  {/* Employee Status Chart */}
+                  <div className="bg-white p-6 shadow-lg rounded-lg">
+                <h2 className="text-lg font-semibold text-center mb-4">Employee Status</h2>
+                <ResponsiveContainer width="100%" height={200}>
+                  <PieChart>
+                    <Pie
+                      data={employeeOverview.status}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      outerRadius={80}
+                      dataKey="value"
+                    >
+                      {employeeOverview.status.map((_, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>

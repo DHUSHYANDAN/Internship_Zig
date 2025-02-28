@@ -31,9 +31,10 @@ const signup = async (req, res) => {
         // Send admin request email if role is Admin
         if (role === 'Admin') {
             sendAdminApprovalEmail(name, email);
-        }
-
-        res.status(200).json({ message: 'Signup successful. A wait for approval ' });
+            res.status(200).json({ message: 'Signup successful. A wait for admin approval ' });
+        }else{
+         
+        res.status(200).json({ message: 'Signup successful' });}
 
     } catch (err) {
         console.error('Error in signup:', err);
@@ -123,13 +124,13 @@ const rejectUser = async (req, res) => {
     const { user_id } = req.params;
 
     try {
-        const [result] = await db.query("UPDATE users SET request_status = 'Rejected' WHERE user_id = ?", [user_id]);
+        const [result] = await db.query("DELETE FROM users WHERE user_id = ?", [user_id]);
 
         if (result.affectedRows === 0) {
-            return res.status(404).json({ error: 'User not found or already rejected.' });
+            return res.status(404).json({ error: 'User not found or already deleted.' });
         }
 
-        res.json({ message: 'User rejected successfully.' });
+        res.json({ message: 'User rejected  successfully.' });
 
     } catch (err) {
         console.error('Error rejecting user:', err);
@@ -155,8 +156,8 @@ const sendAdminApprovalEmail = async (name, email) => {
             <h3>New Admin Request</h3>
             <p>User <b>${name}</b> (${email}) has requested Admin access.</p>
             <p>
-                <a href="${process.env.BASE_URL}/approve-user/${email}">Approve</a> |
-                <a href="${process.env.BASE_URL}/reject/${email}">Reject</a>
+                <a href="${process.env.BASE_URL}/requested-Employees">Approve</a> |
+             
             </p>
         `,
     };

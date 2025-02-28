@@ -60,7 +60,7 @@ const SignIn = () => {
       setTimeout(() => (window.location.href = "/dashboard"), 1500);
     } catch (error) {
       console.error("Sign-in error:", error.message);
-      if(error.message=="Failed to fetch"){
+      if(error.message==="Failed to fetch"){
         toast.error("Failed to connect to the server. Please try again later.");
       }else{
      toast.error(error.message);

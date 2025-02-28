@@ -28,6 +28,10 @@ const index = async (req, res) => {
 };
 
 
+// Departments CRUD
+// ────────────────────────────────────────────────
+
+// Get all departments
 const getDepartments = async (req, res) => {
     try {
         const [departments] = await db.query("SELECT * FROM departments");
@@ -37,6 +41,77 @@ const getDepartments = async (req, res) => {
         res.status(500).json({ error: 'Error in listing departments' });
     }
 };
+
+// Create a new department
+const createDepartment = async (req, res) => {
+    try {
+        const { department_name } = req.body;
+        if (!department_name) return res.status(400).json({ error: "Department name is required" });
+
+        // Check if department already exists
+        const [existingDepartment] = await db.query("SELECT * FROM departments WHERE department_name = ?", [department_name]);
+
+        if (existingDepartment.length > 0) {
+            return res.status(400).json({ error: "Department name already exists" });
+        }
+
+        await db.query("INSERT INTO departments (department_name) VALUES (?)", [department_name]);
+        res.status(201).json({ message: "Department added successfully" });
+    } catch (error) {
+        console.error("Error adding department:", error);
+        res.status(500).json({ error: "Server error" });
+    }
+};
+
+// Update a department
+const updateDepartment = async (req, res) => {
+    try {
+        const { department_id } = req.params;
+        const { department_name } = req.body;
+
+        if (!department_name) return res.status(400).json({ error: "New department name is required" });
+
+        // Check if another department with the same name exists
+        const [existingDepartment] = await db.query(
+            "SELECT * FROM departments WHERE department_name = ? AND department_id != ?",
+            [department_name, department_id]
+        );
+
+        if (existingDepartment.length > 0) {
+            return res.status(400).json({ error: "Department name already exists" });
+        }
+
+        const [result] = await db.query(
+            "UPDATE departments SET department_name = ? WHERE department_id = ?",
+            [department_name, department_id]
+        );
+
+        if (result.affectedRows === 0) return res.status(404).json({ error: "Department not found" });
+
+        res.json({ message: "Department updated successfully" });
+    } catch (error) {
+        console.error("Error updating department:", error);
+        res.status(500).json({ error: "Server error" });
+    }
+};
+
+
+// Delete a department
+const deleteDepartment = async (req, res) => {
+    try {
+        const { department_id } = req.params;
+
+        const [result] = await db.query("DELETE FROM departments WHERE department_id = ?", [department_id]);
+
+        if (result.affectedRows === 0) return res.status(404).json({ error: "Department not found" });
+
+        res.json({ message: "Department deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting department:", error);
+        res.status(500).json({ error: "Server error" });
+    }
+};
+
 
 // Ensure you import your database connection
 
@@ -63,13 +138,86 @@ const getJobRoles = async (req, res) => {
     }
 };
 
+// Create a new job role
+const createJobRole = async (req, res) => {
+    try {
+        const { job_role_name, department_id } = req.body;
+        if (!job_role_name || !department_id) return res.status(400).json({ error: "Job role name and department ID are required" });
+
+        // Check if job role already exists within the same department
+        const [existingJobRole] = await db.query(
+            "SELECT * FROM job_roles WHERE job_role_name = ? AND department_id = ?", 
+            [job_role_name, department_id]
+        );
+
+        if (existingJobRole.length > 0) {
+            return res.status(400).json({ message: "Job role already exists in this department" });
+        }
+
+        await db.query("INSERT INTO job_roles (job_role_name, department_id) VALUES (?, ?)", [job_role_name, department_id]);
+        res.status(201).json({ message: "Job role added successfully" });
+    } catch (error) {
+        console.error("Error adding job role:", error);
+        res.status(500).json({ error: "Server error" });
+    }
+};
+
+
+// Update a job role
+const updateJobRole = async (req, res) => {
+    try {
+        const { job_role_id } = req.params;
+        const { job_role_name, department_id } = req.body;
+
+        if (!job_role_name || !department_id) return res.status(400).json({ error: "Job role name and department ID are required" });
+
+        // Check if another job role with the same name exists in the same department
+        const [existingJobRole] = await db.query(
+            "SELECT * FROM job_roles WHERE job_role_name = ? AND department_id = ? AND job_role_id != ?",
+            [job_role_name, department_id, job_role_id]
+        );
+
+        if (existingJobRole.length > 0) {
+            return res.status(400).json({ error: "Job role already exists in this department" });
+        }
+
+        const [result] = await db.query(
+            "UPDATE job_roles SET job_role_name = ?, department_id = ? WHERE job_role_id = ?",
+            [job_role_name, department_id, job_role_id]
+        );
+
+        if (result.affectedRows === 0) return res.status(404).json({ error: "Job role not found" });
+
+        res.json({ message: "Job role updated successfully" });
+    } catch (error) {
+        console.error("Error updating job role:", error);
+        res.status(500).json({ error: "Server error" });
+    }
+};
+
+
+// Delete a job role
+const deleteJobRole = async (req, res) => {
+    try {
+        const { job_role_id } = req.params;
+
+        const [result] = await db.query("DELETE FROM job_roles WHERE job_role_id = ?", [job_role_id]);
+
+        if (result.affectedRows === 0) return res.status(404).json({ error: "Job role not found" });
+
+        res.json({ message: "Job role deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting job role:", error);
+        res.status(500).json({ error: "Server error" });
+    }
+};
+
 
 // Create Employee (POST Method)
 const detailspost = async (req, res) => {
     const { name, email, phone_number, department_id, job_role_id, date_of_birth, hire_date, status } = req.body;
 
     try {
-        // Extract current year
         const currentYear = new Date().getFullYear();
 
         // Fetch the last employee ID for the current year
@@ -78,21 +226,26 @@ const detailspost = async (req, res) => {
             [`EMP${currentYear}%`]
         );
 
-        // Generate new employee ID
-        let newSequence = 1; // Default if no employees exist for the year
+        let newSequence = 1;
         if (lastEmployee.length > 0) {
-            const lastId = lastEmployee[0].employee_id; // e.g., "EMP2025005"
-            const lastSequence = parseInt(lastId.substring(7)); // Extract last sequence (e.g., "005" → 5)
-            newSequence = lastSequence + 1; // Increment
+            const lastId = lastEmployee[0].employee_id;
+            const lastSequence = parseInt(lastId.substring(7));
+            newSequence = lastSequence + 1;
         }
 
-        // Format new employee ID (e.g., EMP2025001)
         const employee_id = `EMP${currentYear}${String(newSequence).padStart(3, '0')}`;
+
 
         // Check for duplicate email
         const [existingEmployee] = await db.query("SELECT email FROM employees WHERE email = ?", [email]);
         if (existingEmployee.length > 0) {
-            return res.status(400).json({ error: 'Duplicate email. Please use a different email.' });
+            return res.status(400).json({ error: 'This email is already registered.' });
+        }
+
+        // Check for duplicate phone number
+        const [existingPhoneNumber] = await db.query("SELECT phone_number FROM employees WHERE phone_number = ?", [phone_number]);
+        if (existingPhoneNumber.length > 0) {
+            return res.status(400).json({ error: 'This phone number is already registered.' });
         }
 
         // Insert new employee
@@ -101,13 +254,14 @@ const detailspost = async (req, res) => {
             [employee_id, name, email, phone_number, department_id, job_role_id, date_of_birth, hire_date, status]
         );
 
-        res.status(200).json({ message: 'Employee created successfully', employee_id });
+        res.status(201).json({ message: 'Employee added successfully!', employee_id });
 
     } catch (err) {
-        console.error('Error saving employee', err);
-        res.status(500).json({ error: 'Error saving employee' });
+        console.error('Error saving employee:', err);
+        res.status(500).json({ error: 'Something went wrong. Please try again later.' });
     }
 };
+
 
 
 
@@ -140,6 +294,18 @@ const detailsupdate = async (req, res) => {
     const { employee_id, name, email, phone_number, department_id, job_role_id, date_of_birth, hire_date, status } = req.body;
 
     try {
+        // Check for duplicate email
+        const [existingEmployee] = await db.query("SELECT email FROM employees WHERE email = ? AND employee_id != ?", [email, employee_id]);
+        if (existingEmployee.length > 0) {
+            return res.status(400).json({ error: 'This email is already registered.' });
+        }
+
+        // Check for duplicate phone number
+        const [existingPhoneNumber] = await db.query("SELECT phone_number FROM employees WHERE phone_number = ? AND employee_id != ?", [phone_number, employee_id]);
+        if (existingPhoneNumber.length > 0) {
+            return res.status(400).json({ error: 'This phone number is already registered.' });
+        }
+
         const [result] = await db.query(
             "UPDATE employees SET name = ?, email = ?, phone_number = ?, department_id = ?, job_role_id = ?, date_of_birth = ?, hire_date = ?, status = ? WHERE employee_id = ?",
             [name, email, phone_number, department_id, job_role_id, date_of_birth, hire_date, status, employee_id]
@@ -176,4 +342,4 @@ const detailsdelete = async (req, res) => {
     }
 };
 
-module.exports = { index, detailspost, detailsupdateget, detailsupdate, detailsdelete ,getDepartments, getJobRoles};
+module.exports = { index, detailspost, detailsupdateget, detailsupdate, detailsdelete, getDepartments, getJobRoles, createDepartment, updateDepartment, deleteDepartment, createJobRole, updateJobRole, deleteJobRole };
