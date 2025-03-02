@@ -229,7 +229,7 @@ const Signup = () => {
                         type="password"
                         name="confirmPassword"
                         value={formData.confirmPassword}
-                        onChange={handleChange}
+                        onChange={handleChange} 
                         className="w-full p-2 border border-gray-300 rounded mt-1"
                     />
                     {errors.confirmPassword && <p className="text-red-500 text-sm">{errors.confirmPassword}</p>}
