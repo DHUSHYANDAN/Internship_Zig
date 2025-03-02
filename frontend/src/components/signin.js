@@ -1,116 +1,109 @@
 import React, { useState } from 'react';
+import axios from 'axios';
+import baseUrl from '../URL';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
+
+
+
 
 const SignIn = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [emailError, setEmailError] = useState('');
-    const [passwordError, setPasswordError] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [errors, setErrors] = useState({});
 
-    const validateEmail = (email) => {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(String(email).toLowerCase());
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
     };
 
-    const validatePassword = (password) => {
-        return password.length >= 6;
+    const validate = () => {
+        let tempErrors = {};
+        if (!email) tempErrors.email = "Email is required";
+        if (!password) tempErrors.password = "Password is required";
+        setErrors(tempErrors);
+        return Object.keys(tempErrors).length === 0;
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        let valid = true;
+        if (!validate()) return;
 
-        if (!email) {
-            setEmailError('Email is required');
-            valid = false;
-        } else if (!validateEmail(email)) {
-            setEmailError('Invalid email format');
-            valid = false;
-        } else {
-            setEmailError('');
-        }
-
-        if (!password) {
-            setPasswordError('Password is required');
-            valid = false;
-        } else if (!validatePassword(password)) {
-            setPasswordError('Password must be at least 6 characters long');
-            valid = false;
-        } else {
-            setPasswordError('');
-        }
-
-        if (valid) {
-            // Add your sign-in logic here
-            console.log('Email:', email);
-            console.log('Password:', password);
-        }
-    };
-
-    const handleEmailChange = (e) => {
-        setEmail(e.target.value);
-        if (!validateEmail(e.target.value)) {
-            setEmailError('Invalid email format');
-        } else {
-            setEmailError('');
-        }
-    };
-
-    const handlePasswordChange = (e) => {
-        setPassword(e.target.value);
-        if (!validatePassword(e.target.value)) {
-            setPasswordError('Password must be at least 6 characters long');
-        } else {
-            setPasswordError('');
+        try {
+            const response = await axios.post(
+                `${baseUrl}/login`, 
+                { email, password },
+                { withCredentials: true } 
+            );
+            toast.success("Login successful!");
+          localStorage.setItem('name',response.data.user.name);
+     
+            setTimeout(() => {
+                window.location.href = '/home'; 
+            }, 2000);
+            
+        } catch (error) {
+            if (error.response && error.response.data) {
+                toast.error(error.response.data.message);
+            } else {
+                toast.error("An error occurred. Please try again.");
+            }
         }
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
-            <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
-                <h2 className="text-2xl font-bold text-center text-black">Sign In</h2>
-                <form className="space-y-6" onSubmit={handleSubmit}>
-                    <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-black">
+        <div className="flex justify-center items-center h-screen">
+            <div className="w-full max-w-md bg-white p-8 rounded-lg shadow-md">
+                <h2 className="text-2xl font-bold text-center text-blue-500 mb-6">Sign In</h2>
+                <form onSubmit={handleSubmit}>
+                    <div className="mb-4">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
                             Email
                         </label>
                         <input
                             type="email"
                             id="email"
-                            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline `}
                             value={email}
-                            onChange={handleEmailChange}
+                            onChange={(e) => setEmail(e.target.value)}
                         />
-                        {emailError && <p className="text-red-500">{emailError}</p>}
+                        {errors.email && <p className="text-red-500  ">{errors.email}</p>}
                     </div>
-                    <div>
-                        <label htmlFor="password" className="block text-sm font-medium text-black">
+                    <div className="mb-6">
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
                             Password
                         </label>
-                        <input
-                            type="password"
-                            id="password"
-                            className="w-full px-3 py-2 mt-1 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            value={password}
-                            onChange={handlePasswordChange}
-                        />
-                        {passwordError && <p className="text-red-500">{passwordError}</p>}
+                        <div className="relative">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                id="password"
+                                className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline `}
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                            <div className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5">
+                                <button type="button" onClick={togglePasswordVisibility} className="focus:outline-none">
+                                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                                </button>
+                            </div>
+                        </div>
+                        {errors.password && <p className="text-red-500 ">{errors.password}</p>}
                     </div>
-                    <button
-                        type="submit"
-                        className="w-full px-4 py-2 font-bold text-white bg-blue-500 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                        Sign In
-                    </button>
+                    <div className="flex items-center justify-between">
+                        <button
+                            type="submit"
+                            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                        >
+                            Sign In
+                        </button>
+                        <p className="text-center mt-4">
+                  Don't have an account? <a href="/signup" className="text-blue-500">Sign up</a>
+                </p>
+                    </div>
                 </form>
-                <div className="text-center">
-                    <p className="text-sm text-black">
-                        Don't have an account?{' '}
-                        <a href="/signup" className="font-medium text-blue-500 hover:text-blue-700">
-                            Sign Up
-                        </a>
-                    </p>
-                </div>
             </div>
+            <ToastContainer />
         </div>
     );
 };

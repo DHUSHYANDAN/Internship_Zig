@@ -4,13 +4,14 @@ const mongoose = require("mongoose");
 const path = require("path");
 const urlRoutes = require("./routes/route");
 require("dotenv").config();
+const cookieParser = require("cookie-parser");
 
 const app = express();
-const port = 5000;
+const port = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
 app.use(express.json()); 
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 // MongoDB Connection
@@ -24,11 +25,19 @@ mongoose
     process.exit(1);
   });
 
-// Routes
+  app.use(cors({
+    origin: "http://localhost:3000",  // Allow only frontend origin
+    credentials: true  // Allow cookies & authentication headers
+  }));
+  
 
+// Routes
 app.use("/", urlRoutes);
 
+
 // Serve React Frontend
+
+app.use(cors());
 const buildPath = path.join(__dirname, "../frontend/build");
 app.use(express.static(buildPath));
 

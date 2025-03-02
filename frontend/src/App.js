@@ -1,23 +1,25 @@
-
-import React from 'react';
-import { BrowserRouter as  Router, Routes, Route} from 'react-router-dom';
-import SignIn from './components/signin';
-import SignUp from './components/signup';
-import Home from './components/home';
-
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import SignIn from "./pages/signinpage";
+import SignUp from "./pages/signuppage";
+import Home from "./pages/Homepage";
+import ProtectedRoute from "./components/protectedRoutes";
 
 function App() {
-  return (
-    <Router>
+    return (
+        <Router>
             <Routes>
-        <Route path="/" element={<SignIn />} />
-        <Route path="/SignIn" element={<SignIn />} />
-        <Route path="/SignUp" element={<SignUp />} />
-        <Route path="/Home" element={<Home />} />
-        
-        </Routes>
-    </Router>
-  );
+                <Route path="/" element={<SignIn />} />
+                <Route path="/signin" element={<SignIn />} />
+                <Route path="/signup" element={<SignUp />} />
+
+                {/* Protected Route for Home */}
+                <Route element={<ProtectedRoute />}>
+                    <Route path="/home" element={<Home />} />
+                </Route>
+            </Routes>
+        </Router>
+    );
 }
 
 export default App;
